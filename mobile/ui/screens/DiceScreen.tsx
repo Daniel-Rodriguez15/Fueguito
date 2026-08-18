@@ -143,7 +143,7 @@ export function DiceScreen({
           <Animated.View style={[styles.poseCard, { transform: [{ rotate }] }]}>
             {pose ? (
               <>
-                <PoseArt pose={pose} catalog={catalog} size={170} />
+                <PoseArt pose={pose} catalog={catalog} size={170} animated />
                 <Text style={styles.poseName}>{pose.name}</Text>
                 <Text style={styles.poseDescription}>{pose.description}</Text>
                 <Text style={styles.poseHowTo}>{pose.howTo}</Text>

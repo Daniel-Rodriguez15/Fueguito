@@ -197,7 +197,7 @@ function SuccessBanner() {
 function PoseReveal({ pose, catalog }: { pose: Pose; catalog: PoseCatalog }) {
   return (
     <View style={styles.reveal}>
-      <PoseArt pose={pose} catalog={catalog} size={170} />
+      <PoseArt pose={pose} catalog={catalog} size={170} animated />
       <Text style={styles.revealName}>{pose.name}</Text>
       <Text style={styles.revealDescription}>{pose.description}</Text>
       <Text style={styles.revealHowTo}>{pose.howTo}</Text>
