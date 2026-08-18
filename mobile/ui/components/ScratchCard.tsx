@@ -1,15 +1,23 @@
 import { useMemo, useRef, useState } from 'react'
 import { PanResponder, StyleSheet, Text, View } from 'react-native'
 import type { ReactNode } from 'react'
+import Svg, { Circle, Defs, LinearGradient, Mask, Rect, Stop } from 'react-native-svg'
 import { colors } from '../theme'
 
-const GRID_COLS = 9
-const GRID_ROWS = 11
-const REVEAL_THRESHOLD = 0.55
+const BRUSH_RADIUS = 22
+const REVEAL_THRESHOLD = 0.5
+const COVERAGE_COLS = 8
+const COVERAGE_ROWS = 10
+const MAX_POINTS = 400
+
+interface Point {
+  readonly x: number
+  readonly y: number
+}
 
 /**
- * Scratch-off cover: a grid of opaque cells over the content that vanish
- * under the finger. Past the threshold the whole cover clears.
+ * Scratch-off foil: an SVG cover erased through a mask of round brush
+ * strokes that follow the finger. Past the threshold the cover clears.
  */
 export function ScratchCard({
   width,
@@ -22,37 +30,25 @@ export function ScratchCard({
   onRevealed: () => void
   children: ReactNode
 }) {
-  const [scratched, setScratched] = useState<ReadonlySet<number>>(new Set())
+  const [points, setPoints] = useState<readonly Point[]>([])
   const [revealed, setRevealed] = useState(false)
-  const scratchedRef = useRef<Set<number>>(new Set())
+  const pointsRef = useRef<Point[]>([])
+  const coverageRef = useRef<Set<number>>(new Set())
   const revealedRef = useRef(false)
 
-  const cellWidth = width / GRID_COLS
-  const cellHeight = height / GRID_ROWS
-
   const panResponder = useMemo(() => {
-    const scratchAt = (locationX: number, locationY: number) => {
-      if (revealedRef.current) {
+    const scratchAt = (x: number, y: number) => {
+      if (revealedRef.current || x < 0 || y < 0 || x > width || y > height) {
         return
       }
-      const col = Math.floor(locationX / cellWidth)
-      const row = Math.floor(locationY / cellHeight)
-      if (col < 0 || col >= GRID_COLS || row < 0 || row >= GRID_ROWS) {
-        return
+      if (pointsRef.current.length < MAX_POINTS) {
+        pointsRef.current = [...pointsRef.current, { x, y }]
+        setPoints(pointsRef.current)
       }
-      const next = new Set(scratchedRef.current)
-      for (const dc of [-1, 0, 1]) {
-        for (const dr of [-1, 0, 1]) {
-          const c = col + dc
-          const r = row + dr
-          if (c >= 0 && c < GRID_COLS && r >= 0 && r < GRID_ROWS) {
-            next.add(r * GRID_COLS + c)
-          }
-        }
-      }
-      scratchedRef.current = next
-      setScratched(next)
-      if (next.size / (GRID_COLS * GRID_ROWS) >= REVEAL_THRESHOLD) {
+      const col = Math.min(COVERAGE_COLS - 1, Math.floor((x / width) * COVERAGE_COLS))
+      const row = Math.min(COVERAGE_ROWS - 1, Math.floor((y / height) * COVERAGE_ROWS))
+      coverageRef.current.add(row * COVERAGE_COLS + col)
+      if (coverageRef.current.size / (COVERAGE_COLS * COVERAGE_ROWS) >= REVEAL_THRESHOLD) {
         revealedRef.current = true
         setRevealed(true)
         onRevealed()
@@ -67,34 +63,41 @@ export function ScratchCard({
       onPanResponderMove: (event) =>
         scratchAt(event.nativeEvent.locationX, event.nativeEvent.locationY),
     })
-  }, [cellWidth, cellHeight, onRevealed])
-
-  const cells = useMemo(() => Array.from({ length: GRID_COLS * GRID_ROWS }, (_, i) => i), [])
+  }, [width, height, onRevealed])
 
   return (
     <View style={{ width, height }}>
       {children}
       {!revealed && (
         <View style={StyleSheet.absoluteFill} {...panResponder.panHandlers}>
-          <View style={styles.cover}>
-            {cells.map((index) =>
-              scratched.has(index) ? (
-                <View key={index} style={{ width: cellWidth, height: cellHeight }} />
-              ) : (
-                <View
-                  key={index}
-                  style={[
-                    styles.cell,
-                    { width: cellWidth, height: cellHeight },
-                    index % 3 === 0 && styles.cellAlt,
-                  ]}
-                />
-              ),
-            )}
-          </View>
-          {scratched.size === 0 && (
+          <Svg width={width} height={height} pointerEvents="none">
+            <Defs>
+              <LinearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0" stopColor="#8a6273" />
+                <Stop offset="0.5" stopColor="#6d4d5d" />
+                <Stop offset="1" stopColor="#553a49" />
+              </LinearGradient>
+              <Mask id="scratch">
+                <Rect x={0} y={0} width={width} height={height} fill="#fff" />
+                {points.map((point, index) => (
+                  <Circle key={index} cx={point.x} cy={point.y} r={BRUSH_RADIUS} fill="#000" />
+                ))}
+              </Mask>
+            </Defs>
+            <Rect
+              x={0}
+              y={0}
+              width={width}
+              height={height}
+              rx={16}
+              fill="url(#foil)"
+              mask="url(#scratch)"
+            />
+          </Svg>
+          {points.length === 0 && (
             <View style={styles.hintWrap} pointerEvents="none">
-              <Text style={styles.hint}>Raspa con el dedo ✨</Text>
+              <Text style={styles.hintIcon}>🎁</Text>
+              <Text style={styles.hint}>Raspa con el dedo</Text>
             </View>
           )}
         </View>
@@ -104,19 +107,6 @@ export function ScratchCard({
 }
 
 const styles = StyleSheet.create({
-  cover: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    overflow: 'hidden',
-    borderRadius: 16,
-  },
-  cell: {
-    backgroundColor: '#6d5560',
-  },
-  cellAlt: {
-    backgroundColor: '#7a5f6c',
-  },
   hintWrap: {
     position: 'absolute',
     top: 0,
@@ -125,6 +115,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 6,
+  },
+  hintIcon: {
+    fontSize: 34,
   },
   hint: {
     color: colors.text,

@@ -28,6 +28,8 @@ export interface Pose {
   readonly id: string
   readonly name: string
   readonly description: string
+  /** Short practical instructions on how to set up the pose. */
+  readonly howTo: string
   readonly spice: SpiceLevel
   readonly art: PoseArt
 }

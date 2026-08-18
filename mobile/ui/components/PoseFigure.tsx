@@ -1,8 +1,8 @@
-import Svg, { Circle, G, Path } from 'react-native-svg'
+import Svg, { Circle, G, Line, Path } from 'react-native-svg'
 import type { PoseArt, PoseCatalog } from '@/domain/pose'
 import { colors } from '../theme'
 
-const FIGURE_A_COLOR = colors.fire
+const FIGURE_A_COLOR = colors.truth
 const FIGURE_B_COLOR = colors.dare
 
 function figureTransform(x: number, y: number, rotation: number, mirrored: boolean): string {
@@ -33,7 +33,7 @@ function FigureGroup({
           key={d}
           d={d}
           stroke={color}
-          strokeWidth={7}
+          strokeWidth={8}
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
@@ -56,6 +56,15 @@ export function PoseFigure({
   const { dx, dy, rotation, mirrored } = art.arrangement
   return (
     <Svg width={size} height={size * 0.85} viewBox="-10 -15 160 135">
+      <Line
+        x1={-2}
+        y1={112}
+        x2={142}
+        y2={112}
+        stroke={colors.border}
+        strokeWidth={4}
+        strokeLinecap="round"
+      />
       <FigureGroup
         postureId={art.a}
         catalog={catalog}

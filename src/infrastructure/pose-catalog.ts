@@ -55,6 +55,21 @@ const POSTURES: Readonly<Record<string, FigurePosture>> = {
   },
 }
 
+const POSTURE_LABELS: Readonly<Record<string, string>> = {
+  stand: 'de pie',
+  lean: 'inclinada hacia adelante',
+  kneel: 'de rodillas',
+  allFours: 'en cuatro apoyos',
+  sit: 'sentada',
+  lieBack: 'acostada boca arriba',
+  legsUp: 'boca arriba con las piernas en alto',
+  bridge: 'con las caderas elevadas en puente',
+  straddle: 'a horcajadas encima',
+  wrap: 'abrazada con las piernas alrededor',
+  squat: 'en cuclillas',
+  recline: 'reclinada hacia atrás apoyada en los brazos',
+}
+
 // [name, description, spice, postureA, postureB, dx, dy, rotation, mirrored]
 type PoseDef = readonly [string, string, SpiceLevel, string, string, number, number, number, boolean]
 
@@ -166,6 +181,7 @@ const POSES: readonly Pose[] = POSE_DEFS.map(
     id: `pose-${String(index + 1).padStart(3, '0')}`,
     name,
     description,
+    howTo: `Una persona ${POSTURE_LABELS[a] ?? a}; la otra, ${POSTURE_LABELS[b] ?? b}. Ajusten distancia y ritmo a gusto.`,
     spice,
     art: { a, b, arrangement: { dx, dy, rotation, mirrored } },
   }),

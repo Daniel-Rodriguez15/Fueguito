@@ -146,6 +146,7 @@ export function DiceScreen({
                 <PoseFigure art={pose.art} catalog={catalog} size={170} />
                 <Text style={styles.poseName}>{pose.name}</Text>
                 <Text style={styles.poseDescription}>{pose.description}</Text>
+                <Text style={styles.poseHowTo}>{pose.howTo}</Text>
                 <Text style={styles.poseSpice}>{'🔥'.repeat(pose.spice)}</Text>
               </>
             ) : (
@@ -227,7 +228,9 @@ const styles = StyleSheet.create({
     width: 150,
     height: 170,
     borderRadius: 24,
-    backgroundColor: '#f3edef',
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
@@ -253,20 +256,20 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.bgCard,
-    opacity: 0.35,
+    backgroundColor: colors.fire,
+    opacity: 0.5,
   },
   textDieIcon: {
     fontSize: 46,
   },
   textDieValue: {
-    color: colors.bgCard,
+    color: colors.text,
     fontSize: 19,
     fontWeight: '800',
     textAlign: 'center',
   },
   textDieLabel: {
-    color: '#8a6f7b',
+    color: colors.textDim,
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 2,
@@ -289,6 +292,12 @@ const styles = StyleSheet.create({
   poseDescription: {
     color: colors.textDim,
     textAlign: 'center',
+  },
+  poseHowTo: {
+    color: colors.textDim,
+    textAlign: 'center',
+    fontSize: 12,
+    fontStyle: 'italic',
   },
   poseSpice: {
     fontSize: 16,

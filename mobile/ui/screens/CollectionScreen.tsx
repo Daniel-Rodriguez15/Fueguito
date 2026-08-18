@@ -10,7 +10,7 @@ import { SpiceRating } from '../components/SpiceRating'
 import { colors, radius } from '../theme'
 
 const CARD_WIDTH = 260
-const CARD_HEIGHT = 330
+const CARD_HEIGHT = 360
 
 export function CollectionScreen({
   catalog,
@@ -161,9 +161,10 @@ export function CollectionScreen({
 function PoseReveal({ pose, catalog }: { pose: Pose; catalog: PoseCatalog }) {
   return (
     <View style={styles.reveal}>
-      <PoseFigure art={pose.art} catalog={catalog} size={180} />
+      <PoseFigure art={pose.art} catalog={catalog} size={170} />
       <Text style={styles.revealName}>{pose.name}</Text>
       <Text style={styles.revealDescription}>{pose.description}</Text>
+      <Text style={styles.revealHowTo}>{pose.howTo}</Text>
       <Text style={styles.revealSpice}>{'🔥'.repeat(pose.spice)}</Text>
     </View>
   )
@@ -275,6 +276,12 @@ const styles = StyleSheet.create({
     color: colors.textDim,
     textAlign: 'center',
     fontSize: 13,
+  },
+  revealHowTo: {
+    color: colors.textDim,
+    textAlign: 'center',
+    fontSize: 11,
+    fontStyle: 'italic',
   },
   revealSpice: {
     fontSize: 15,
