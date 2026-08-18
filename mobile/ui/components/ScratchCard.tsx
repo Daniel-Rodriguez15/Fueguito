@@ -1,23 +1,37 @@
 import { useMemo, useRef, useState } from 'react'
-import { PanResponder, StyleSheet, Text, View } from 'react-native'
+import { Animated, PanResponder, StyleSheet, Text, View } from 'react-native'
 import type { ReactNode } from 'react'
-import Svg, { Circle, Defs, LinearGradient, Mask, Rect, Stop } from 'react-native-svg'
+import * as Haptics from 'expo-haptics'
+import Svg, { Defs, LinearGradient, Mask, Path, Rect, Stop } from 'react-native-svg'
 import { colors } from '../theme'
 
-const BRUSH_RADIUS = 22
-const REVEAL_THRESHOLD = 0.5
+const BRUSH_WIDTH = 46
+const REVEAL_THRESHOLD = 0.45
 const COVERAGE_COLS = 8
 const COVERAGE_ROWS = 10
-const MAX_POINTS = 400
+const MIN_POINT_DISTANCE = 5
+const FADE_OUT_MS = 350
 
 interface Point {
   readonly x: number
   readonly y: number
 }
 
+function strokePath(stroke: readonly Point[]): string {
+  if (stroke.length === 0) {
+    return ''
+  }
+  const [first, ...rest] = stroke
+  // A lone tap still paints a dot thanks to the round line cap.
+  if (rest.length === 0) {
+    return `M${first.x} ${first.y} L${first.x + 0.1} ${first.y}`
+  }
+  return `M${first.x} ${first.y} ${rest.map((p) => `L${p.x} ${p.y}`).join(' ')}`
+}
+
 /**
- * Scratch-off foil: an SVG cover erased through a mask of round brush
- * strokes that follow the finger. Past the threshold the cover clears.
+ * Scratch-off foil: an SVG cover erased by continuous brush strokes that
+ * follow the finger. Past the threshold it fades out with a haptic tick.
  */
 export function ScratchCard({
   width,
@@ -30,28 +44,48 @@ export function ScratchCard({
   onRevealed: () => void
   children: ReactNode
 }) {
-  const [points, setPoints] = useState<readonly Point[]>([])
-  const [revealed, setRevealed] = useState(false)
-  const pointsRef = useRef<Point[]>([])
+  const [strokes, setStrokes] = useState<ReadonlyArray<readonly Point[]>>([])
+  const [gone, setGone] = useState(false)
+  const strokesRef = useRef<Point[][]>([])
   const coverageRef = useRef<Set<number>>(new Set())
   const revealedRef = useRef(false)
+  const fade = useRef(new Animated.Value(1)).current
 
   const panResponder = useMemo(() => {
-    const scratchAt = (x: number, y: number) => {
+    const addPoint = (x: number, y: number, newStroke: boolean) => {
       if (revealedRef.current || x < 0 || y < 0 || x > width || y > height) {
         return
       }
-      if (pointsRef.current.length < MAX_POINTS) {
-        pointsRef.current = [...pointsRef.current, { x, y }]
-        setPoints(pointsRef.current)
+      if (newStroke) {
+        strokesRef.current.push([{ x, y }])
+      } else {
+        const current = strokesRef.current[strokesRef.current.length - 1]
+        if (!current) {
+          strokesRef.current.push([{ x, y }])
+        } else {
+          const last = current[current.length - 1]
+          if (Math.hypot(x - last.x, y - last.y) < MIN_POINT_DISTANCE) {
+            return
+          }
+          current.push({ x, y })
+        }
       }
+      setStrokes(strokesRef.current.map((stroke) => [...stroke]))
+
       const col = Math.min(COVERAGE_COLS - 1, Math.floor((x / width) * COVERAGE_COLS))
       const row = Math.min(COVERAGE_ROWS - 1, Math.floor((y / height) * COVERAGE_ROWS))
       coverageRef.current.add(row * COVERAGE_COLS + col)
       if (coverageRef.current.size / (COVERAGE_COLS * COVERAGE_ROWS) >= REVEAL_THRESHOLD) {
         revealedRef.current = true
-        setRevealed(true)
-        onRevealed()
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
+        Animated.timing(fade, {
+          toValue: 0,
+          duration: FADE_OUT_MS,
+          useNativeDriver: true,
+        }).start(() => {
+          setGone(true)
+          onRevealed()
+        })
       }
     }
 
@@ -59,28 +93,37 @@ export function ScratchCard({
       onStartShouldSetPanResponder: () => !revealedRef.current,
       onMoveShouldSetPanResponder: () => !revealedRef.current,
       onPanResponderGrant: (event) =>
-        scratchAt(event.nativeEvent.locationX, event.nativeEvent.locationY),
+        addPoint(event.nativeEvent.locationX, event.nativeEvent.locationY, true),
       onPanResponderMove: (event) =>
-        scratchAt(event.nativeEvent.locationX, event.nativeEvent.locationY),
+        addPoint(event.nativeEvent.locationX, event.nativeEvent.locationY, false),
     })
-  }, [width, height, onRevealed])
+  }, [width, height, onRevealed, fade])
 
   return (
     <View style={{ width, height }}>
       {children}
-      {!revealed && (
-        <View style={StyleSheet.absoluteFill} {...panResponder.panHandlers}>
+      {!gone && (
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: fade }]} {...panResponder.panHandlers}>
           <Svg width={width} height={height} pointerEvents="none">
             <Defs>
               <LinearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
                 <Stop offset="0" stopColor="#8a6273" />
-                <Stop offset="0.5" stopColor="#6d4d5d" />
+                <Stop offset="0.45" stopColor="#6d4d5d" />
+                <Stop offset="0.55" stopColor="#7d5a6b" />
                 <Stop offset="1" stopColor="#553a49" />
               </LinearGradient>
               <Mask id="scratch">
                 <Rect x={0} y={0} width={width} height={height} fill="#fff" />
-                {points.map((point, index) => (
-                  <Circle key={index} cx={point.x} cy={point.y} r={BRUSH_RADIUS} fill="#000" />
+                {strokes.map((stroke, index) => (
+                  <Path
+                    key={index}
+                    d={strokePath(stroke)}
+                    stroke="#000"
+                    strokeWidth={BRUSH_WIDTH}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
                 ))}
               </Mask>
             </Defs>
@@ -94,13 +137,13 @@ export function ScratchCard({
               mask="url(#scratch)"
             />
           </Svg>
-          {points.length === 0 && (
+          {strokes.length === 0 && (
             <View style={styles.hintWrap} pointerEvents="none">
               <Text style={styles.hintIcon}>🎁</Text>
               <Text style={styles.hint}>Raspa con el dedo</Text>
             </View>
           )}
-        </View>
+        </Animated.View>
       )}
     </View>
   )
