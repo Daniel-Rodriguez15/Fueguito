@@ -6,7 +6,7 @@ export type GameId = 'truth-or-dare' | 'bottle' | 'dice' | 'collection'
 const GAMES: ReadonlyArray<{ id: GameId; icon: string; name: string; tagline: string }> = [
   { id: 'truth-or-dare', icon: '🎭', name: 'Verdad o Reto', tagline: 'Suave, picante o fuego' },
   { id: 'dice', icon: '🎲', name: 'Dados Hot', tagline: 'Acción, zona… o pose' },
-  { id: 'collection', icon: '🎁', name: 'Colección', tagline: 'Raspa y descubre 100 poses' },
+  { id: 'collection', icon: '🎁', name: 'Colección', tagline: 'Raspa y descubre poses' },
   { id: 'bottle', icon: '🍾', name: 'Pico Botella', tagline: 'La botella decide' },
 ]
 

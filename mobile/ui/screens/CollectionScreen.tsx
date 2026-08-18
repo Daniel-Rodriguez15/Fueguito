@@ -3,7 +3,7 @@ import { Animated, FlatList, Modal, Pressable, StyleSheet, Text, View } from 're
 import { useAudioPlayer } from 'expo-audio'
 import type { PoseCollectionService } from '@/application/pose-collection-service'
 import type { Pose, PoseCatalog } from '@/domain/pose'
-import { unlockedCount, type CollectionState, type PoseRating } from '@/domain/pose-collection'
+import type { CollectionState, PoseRating } from '@/domain/pose-collection'
 import { BackButton } from '../components/BackButton'
 import { PoseArt } from '../components/PoseArt'
 import { ScratchCard } from '../components/ScratchCard'
@@ -49,7 +49,8 @@ export function CollectionScreen({
 
   const poses = catalog.getPoses()
   const total = poses.length
-  const owned = unlockedCount(collection)
+  // Count against the catalog so stale entries from removed poses don't inflate it.
+  const owned = poses.filter((pose) => pose.id in collection.entries).length
 
   const unlock = async () => {
     if (unlocking || !ready) {
