@@ -3,6 +3,7 @@ import { Animated, Easing, Pressable, StyleSheet, Text, TextInput, View } from '
 import { MIN_BOTTLE_PLAYERS, spinBottle } from '@/domain/bottle'
 import type { RandomSource } from '@/domain/random'
 import { BackButton } from '../components/BackButton'
+import { Bottle } from '../components/Bottle'
 import { colors, radius } from '../theme'
 
 const SPIN_EXTRA_TURNS = 4
@@ -116,8 +117,7 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
           )
         })}
         <Animated.View style={[styles.bottle, { transform: [{ rotate }] }]}>
-          <View style={styles.bottleNeck} />
-          <View style={styles.bottleBody} />
+          <Bottle width={46} />
         </Animated.View>
       </View>
 
@@ -209,22 +209,6 @@ const styles = StyleSheet.create({
   },
   bottle: {
     alignItems: 'center',
-  },
-  bottleNeck: {
-    width: 14,
-    height: 34,
-    backgroundColor: '#2e7d4f',
-    borderTopLeftRadius: 7,
-    borderTopRightRadius: 7,
-  },
-  bottleBody: {
-    width: 38,
-    height: 82,
-    backgroundColor: '#2f8a57',
-    borderTopLeftRadius: 9,
-    borderTopRightRadius: 9,
-    borderBottomLeftRadius: 17,
-    borderBottomRightRadius: 17,
   },
   hint: {
     color: colors.textDim,

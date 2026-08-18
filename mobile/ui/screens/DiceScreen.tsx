@@ -13,11 +13,22 @@ const ROLL_DURATION_MS = 600
 
 type DiceMode = 'classic' | 'poses'
 
-function TextDie({ label, value, hint }: { label: string; value: string | null; hint: string }) {
+// Icons indexed to match DICE_ACTIONS / DICE_ZONES in the domain.
+const ACTION_ICONS: readonly string[] = ['💋', '👅', '😈', '💆', '🤲', '💨']
+const ZONE_ICONS: readonly string[] = ['🧣', '👂', '🫦', '🫂', '🔥', '🦵']
+
+function TextDie({ label, icon, value }: { label: string; icon: string | null; value: string | null }) {
   return (
     <View style={styles.textDie}>
+      <View style={styles.textDieCorner}>
+        <View style={styles.textDiePip} />
+      </View>
+      <Text style={styles.textDieIcon}>{icon ?? '🎲'}</Text>
+      <Text style={styles.textDieValue}>{value ?? '¿?'}</Text>
       <Text style={styles.textDieLabel}>{label}</Text>
-      <Text style={styles.textDieValue}>{value ?? hint}</Text>
+      <View style={[styles.textDieCorner, styles.textDieCornerBottom]}>
+        <View style={styles.textDiePip} />
+      </View>
     </View>
   )
 }
@@ -117,8 +128,16 @@ export function DiceScreen({
       <View style={styles.body}>
         {mode === 'classic' ? (
           <Animated.View style={[styles.classicRow, { transform: [{ rotate }] }]}>
-            <TextDie label="Acción" value={roll?.action ?? null} hint="?" />
-            <TextDie label="Zona" value={roll?.zone ?? null} hint="?" />
+            <TextDie
+              label="Acción"
+              icon={roll ? ACTION_ICONS[roll.actionIndex] : null}
+              value={roll?.action ?? null}
+            />
+            <TextDie
+              label="Zona"
+              icon={roll ? ZONE_ICONS[roll.zoneIndex] : null}
+              value={roll?.zone ?? null}
+            />
           </Animated.View>
         ) : canRollPoses ? (
           <Animated.View style={[styles.poseCard, { transform: [{ rotate }] }]}>
@@ -205,28 +224,52 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   textDie: {
-    width: 140,
-    height: 140,
-    borderRadius: 22,
-    backgroundColor: colors.bgCard,
-    borderWidth: 1,
-    borderColor: colors.border,
+    width: 150,
+    height: 170,
+    borderRadius: 24,
+    backgroundColor: '#f3edef',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 4,
     padding: 12,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.45,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
   },
-  textDieLabel: {
-    color: colors.textDim,
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
+  textDieCorner: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+  },
+  textDieCornerBottom: {
+    top: undefined,
+    left: undefined,
+    bottom: 10,
+    right: 10,
+  },
+  textDiePip: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.bgCard,
+    opacity: 0.35,
+  },
+  textDieIcon: {
+    fontSize: 46,
   },
   textDieValue: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '700',
+    color: colors.bgCard,
+    fontSize: 19,
+    fontWeight: '800',
     textAlign: 'center',
+  },
+  textDieLabel: {
+    color: '#8a6f7b',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
   },
   poseCard: {
     alignItems: 'center',

@@ -5,10 +5,10 @@ import type { IntensityLevel, Prompt } from '@/domain/truth-or-dare'
 import { BackButton } from '../components/BackButton'
 import { colors, radius } from '../theme'
 
-const LEVELS: ReadonlyArray<{ id: IntensityLevel; label: string }> = [
-  { id: 'soft', label: '😊 Suave' },
-  { id: 'spicy', label: '🌶️ Picante' },
-  { id: 'fire', label: '🔥 Fuego' },
+const LEVELS: ReadonlyArray<{ id: IntensityLevel; icon: string; label: string }> = [
+  { id: 'soft', icon: '😊', label: 'Suave' },
+  { id: 'spicy', icon: '🌶️', label: 'Picante' },
+  { id: 'fire', icon: '🔥', label: 'Fuego' },
 ]
 
 export function TruthOrDareScreen({ game, onBack }: { game: TruthOrDareGame; onBack: () => void }) {
@@ -27,7 +27,10 @@ export function TruthOrDareScreen({ game, onBack }: { game: TruthOrDareGame; onB
             style={[styles.levelButton, level === option.id && styles.levelButtonActive]}
             onPress={() => setLevel(option.id)}
           >
-            <Text style={styles.levelLabel}>{option.label}</Text>
+            <Text style={styles.levelIcon}>{option.icon}</Text>
+            <Text style={styles.levelLabel} numberOfLines={1}>
+              {option.label}
+            </Text>
           </Pressable>
         ))}
       </View>
@@ -81,20 +84,26 @@ const styles = StyleSheet.create({
   levelRow: {
     flexDirection: 'row',
     gap: 8,
-    justifyContent: 'center',
+    width: '100%',
   },
   levelButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
+    flex: 1,
+    alignItems: 'center',
+    gap: 2,
+    paddingVertical: 10,
     borderRadius: radius,
     backgroundColor: colors.surface,
   },
   levelButtonActive: {
     backgroundColor: colors.fire,
   },
+  levelIcon: {
+    fontSize: 20,
+  },
   levelLabel: {
     color: colors.text,
     fontWeight: '600',
+    fontSize: 13,
   },
   body: {
     flex: 1,
