@@ -15,6 +15,10 @@ export const POSE_IMAGES: Readonly<Record<string, ImageSourcePropType>> = {
   bridgeUp: require('../assets/poses/bridgeUp.png'),
   faceToFace: require('../assets/poses/faceToFace.png'),
   sixtynine: require('../assets/poses/sixtynine.png'),
+  fellatio: require('../assets/poses/fellatio.png'),
+  cunnilingus: require('../assets/poses/cunnilingus.png'),
+  fingering: require('../assets/poses/fingering.png'),
+  mammary: require('../assets/poses/mammary.png'),
 }
 
 export const POSE_IMAGE_CREDIT = 'Ilustraciones: Seedfeeder · Wikimedia Commons · CC BY-SA'

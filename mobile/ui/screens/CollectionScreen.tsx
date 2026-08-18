@@ -133,6 +133,17 @@ export function CollectionScreen({
             {owned >= total ? 'Colección completa 🏆' : 'Nueva pose 🎁'}
           </Text>
         </Pressable>
+        {owned < total && (
+          <Pressable
+            onPress={async () => {
+              const next = await service.unlockAll(collection)
+              onCollectionChange(next)
+            }}
+            hitSlop={8}
+          >
+            <Text style={styles.unlockAll}>Desbloquear todas</Text>
+          </Pressable>
+        )}
         <Text style={styles.credit}>{POSE_IMAGE_CREDIT}</Text>
       </View>
 
@@ -277,6 +288,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
+  },
+  unlockAll: {
+    color: colors.textDim,
+    fontSize: 13,
+    textDecorationLine: 'underline',
+    marginTop: 8,
   },
   credit: {
     color: colors.textDim,

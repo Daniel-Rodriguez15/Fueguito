@@ -46,6 +46,17 @@ export function unlockRandomPose(
   }
 }
 
+/** Unlocks every pose at once, keeping any existing ratings. */
+export function unlockAllPoses(state: CollectionState, poseIds: readonly string[]): CollectionState {
+  const entries = { ...state.entries }
+  for (const id of poseIds) {
+    if (!(id in entries)) {
+      entries[id] = { rating: null }
+    }
+  }
+  return { entries }
+}
+
 /** Rating an unknown pose is a no-op: you can only rate what you unlocked. */
 export function ratePose(
   state: CollectionState,
