@@ -27,6 +27,8 @@ export interface PoseArt {
 export interface Pose {
   readonly id: string
   readonly name: string
+  /** Scene archetype key; UIs may map it to richer artwork. */
+  readonly scene: string
   readonly description: string
   /** Short practical instructions on how to set up the pose. */
   readonly howTo: string

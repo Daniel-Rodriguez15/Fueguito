@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { useAudioPlayer } from 'expo-audio'
 import type { PoseCollectionService } from '@/application/pose-collection-service'
 import type { Pose, PoseCatalog } from '@/domain/pose'
 import { unlockedCount, type CollectionState, type PoseRating } from '@/domain/pose-collection'
 import { BackButton } from '../components/BackButton'
-import { PoseFigure } from '../components/PoseFigure'
+import { PoseArt } from '../components/PoseArt'
 import { ScratchCard } from '../components/ScratchCard'
 import { SpiceRating } from '../components/SpiceRating'
+import { POSE_IMAGE_CREDIT } from '../pose-images'
 import { colors, radius } from '../theme'
+
+const SUCCESS_SOUND = require('../../assets/sounds/success.wav')
 
 const CARD_WIDTH = 260
 const CARD_HEIGHT = 360
@@ -31,6 +35,17 @@ export function CollectionScreen({
   const [scratchDone, setScratchDone] = useState(false)
   const [detail, setDetail] = useState<Pose | null>(null)
   const [unlocking, setUnlocking] = useState(false)
+  const successPlayer = useAudioPlayer(SUCCESS_SOUND)
+
+  const onRevealed = () => {
+    setScratchDone(true)
+    try {
+      successPlayer.seekTo(0)
+      successPlayer.play()
+    } catch {
+      // Sound is a nicety; never let it break the reveal.
+    }
+  }
 
   const poses = catalog.getPoses()
   const total = poses.length
@@ -91,7 +106,7 @@ export function CollectionScreen({
             >
               {isOwned ? (
                 <>
-                  <PoseFigure art={item.art} catalog={catalog} size={72} />
+                  <PoseArt pose={item} catalog={catalog} size={72} />
                   <Text style={styles.slotName} numberOfLines={1}>
                     {item.name}
                   </Text>
@@ -117,6 +132,7 @@ export function CollectionScreen({
             {owned >= total ? 'Colección completa 🏆' : 'Nueva pose 🎁'}
           </Text>
         </Pressable>
+        <Text style={styles.credit}>{POSE_IMAGE_CREDIT}</Text>
       </View>
 
       <Modal visible={modalPose !== null} transparent animationType="fade" onRequestClose={closeModal}>
@@ -127,7 +143,7 @@ export function CollectionScreen({
                 <ScratchCard
                   width={CARD_WIDTH}
                   height={CARD_HEIGHT}
-                  onRevealed={() => setScratchDone(true)}
+                  onRevealed={onRevealed}
                 >
                   <PoseReveal pose={modalPose} catalog={catalog} />
                 </ScratchCard>
@@ -181,7 +197,7 @@ function SuccessBanner() {
 function PoseReveal({ pose, catalog }: { pose: Pose; catalog: PoseCatalog }) {
   return (
     <View style={styles.reveal}>
-      <PoseFigure art={pose.art} catalog={catalog} size={170} />
+      <PoseArt pose={pose} catalog={catalog} size={170} />
       <Text style={styles.revealName}>{pose.name}</Text>
       <Text style={styles.revealDescription}>{pose.description}</Text>
       <Text style={styles.revealHowTo}>{pose.howTo}</Text>
@@ -260,6 +276,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
+  },
+  credit: {
+    color: colors.textDim,
+    fontSize: 10,
+    marginTop: 6,
   },
   modalBackdrop: {
     flex: 1,

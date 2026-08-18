@@ -6,7 +6,7 @@ import type { RandomSource } from '@/domain/random'
 import { randomIndex } from '@/domain/random'
 import { rollActionZone, type ActionZoneRoll } from '@/domain/sex-dice'
 import { BackButton } from '../components/BackButton'
-import { PoseFigure } from '../components/PoseFigure'
+import { PoseArt } from '../components/PoseArt'
 import { colors, radius } from '../theme'
 
 const ROLL_DURATION_MS = 600
@@ -143,7 +143,7 @@ export function DiceScreen({
           <Animated.View style={[styles.poseCard, { transform: [{ rotate }] }]}>
             {pose ? (
               <>
-                <PoseFigure art={pose.art} catalog={catalog} size={170} />
+                <PoseArt pose={pose} catalog={catalog} size={170} />
                 <Text style={styles.poseName}>{pose.name}</Text>
                 <Text style={styles.poseDescription}>{pose.description}</Text>
                 <Text style={styles.poseHowTo}>{pose.howTo}</Text>

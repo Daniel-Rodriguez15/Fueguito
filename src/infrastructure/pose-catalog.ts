@@ -473,6 +473,7 @@ const POSES: readonly Pose[] = POSE_DEFS.map(([name, description, spice, sceneKe
   return {
     id: `pose-${String(index + 1).padStart(3, '0')}`,
     name,
+    scene: sceneKey,
     description,
     howTo: scene.howTo,
     spice,
