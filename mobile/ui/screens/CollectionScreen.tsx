@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { Animated, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { PoseCollectionService } from '@/application/pose-collection-service'
 import type { Pose, PoseCatalog } from '@/domain/pose'
 import { unlockedCount, type CollectionState, type PoseRating } from '@/domain/pose-collection'
@@ -137,6 +137,8 @@ export function CollectionScreen({
                 </View>
               )}
 
+              {fresh && scratchDone && <SuccessBanner />}
+
               {showContent && (
                 <View style={styles.ratingBlock}>
                   <Text style={styles.ratingLabel}>¿Qué calificación le dan?</Text>
@@ -155,6 +157,24 @@ export function CollectionScreen({
         </View>
       </Modal>
     </View>
+  )
+}
+
+function SuccessBanner() {
+  const scale = useRef(new Animated.Value(0.3)).current
+  const opacity = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, friction: 4, tension: 80, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+    ]).start()
+  }, [scale, opacity])
+
+  return (
+    <Animated.View style={[styles.successBanner, { opacity, transform: [{ scale }] }]}>
+      <Text style={styles.successText}>🎉 ¡Nueva pose desbloqueada!</Text>
+    </Animated.View>
   )
 }
 
@@ -284,6 +304,17 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   revealSpice: {
+    fontSize: 15,
+  },
+  successBanner: {
+    backgroundColor: colors.fire,
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+  },
+  successText: {
+    color: '#fff',
+    fontWeight: '800',
     fontSize: 15,
   },
   ratingBlock: {

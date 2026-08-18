@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { Animated, PanResponder, StyleSheet, Text, View } from 'react-native'
+import { Animated, PanResponder, StyleSheet, Text, Vibration, View } from 'react-native'
 import type { ReactNode } from 'react'
 import * as Haptics from 'expo-haptics'
 import Svg, { Defs, LinearGradient, Mask, Path, Rect, Stop } from 'react-native-svg'
@@ -47,6 +47,7 @@ export function ScratchCard({
   const [strokes, setStrokes] = useState<ReadonlyArray<readonly Point[]>>([])
   const [gone, setGone] = useState(false)
   const strokesRef = useRef<Point[][]>([])
+  const pointCountRef = useRef(0)
   const coverageRef = useRef<Set<number>>(new Set())
   const revealedRef = useRef(false)
   const fade = useRef(new Animated.Value(1)).current
@@ -72,12 +73,18 @@ export function ScratchCard({
       }
       setStrokes(strokesRef.current.map((stroke) => [...stroke]))
 
+      pointCountRef.current += 1
+      if (pointCountRef.current % 6 === 0) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {})
+      }
+
       const col = Math.min(COVERAGE_COLS - 1, Math.floor((x / width) * COVERAGE_COLS))
       const row = Math.min(COVERAGE_ROWS - 1, Math.floor((y / height) * COVERAGE_ROWS))
       coverageRef.current.add(row * COVERAGE_COLS + col)
       if (coverageRef.current.size / (COVERAGE_COLS * COVERAGE_ROWS) >= REVEAL_THRESHOLD) {
         revealedRef.current = true
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {})
+        Vibration.vibrate(120)
         Animated.timing(fade, {
           toValue: 0,
           duration: FADE_OUT_MS,
