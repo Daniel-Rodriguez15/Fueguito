@@ -1,12 +1,13 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { colors, radius } from '../theme'
 
-export type GameId = 'truth-or-dare' | 'bottle' | 'dice'
+export type GameId = 'truth-or-dare' | 'bottle' | 'dice' | 'collection'
 
 const GAMES: ReadonlyArray<{ id: GameId; icon: string; name: string; tagline: string }> = [
-  { id: 'truth-or-dare', icon: '🎭', name: 'Verdad o Reto', tagline: 'Confiesa o cumple' },
+  { id: 'truth-or-dare', icon: '🎭', name: 'Verdad o Reto', tagline: 'Suave, picante o fuego' },
+  { id: 'dice', icon: '🎲', name: 'Dados Hot', tagline: 'Acción, zona… o pose' },
+  { id: 'collection', icon: '🎁', name: 'Colección', tagline: 'Raspa y descubre 100 poses' },
   { id: 'bottle', icon: '🍾', name: 'Pico Botella', tagline: 'La botella decide' },
-  { id: 'dice', icon: '🎲', name: 'Dados', tagline: 'Que decida la suerte' },
 ]
 
 export function HomeScreen({ onSelectGame }: { onSelectGame: (game: GameId) => void }) {
@@ -14,7 +15,7 @@ export function HomeScreen({ onSelectGame }: { onSelectGame: (game: GameId) => v
     <View style={styles.screen}>
       <View style={styles.header}>
         <Text style={styles.title}>Fueguito</Text>
-        <Text style={styles.subtitle}>Juegos para encender la noche 🔥</Text>
+        <Text style={styles.subtitle}>Juegos para encender la noche en pareja 🔥</Text>
       </View>
       <View style={styles.list}>
         {GAMES.map((game) => (

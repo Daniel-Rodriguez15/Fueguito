@@ -1,55 +1,99 @@
 import type { PromptRepository } from '@/domain/prompt-repository'
-import type { Prompt } from '@/domain/truth-or-dare'
+import type { IntensityLevel, Prompt, PromptKind } from '@/domain/truth-or-dare'
 
-const TRUTHS: readonly string[] = [
-  '¿Cuál es tu crush secreto en esta sala?',
-  '¿Cuál fue tu peor cita?',
-  '¿A quién de aquí le darías un beso?',
-  '¿Qué es lo más atrevido que has hecho por amor?',
-  '¿Cuál es tu mayor red flag en una relación?',
-  '¿Alguna vez escribiste a un ex arrepintiéndote después?',
-  '¿Qué es lo más vergonzoso que hay en tu galería?',
-  '¿Quién de esta sala te parece más atractivo?',
-  '¿Cuál fue tu peor beso?',
-  '¿Alguna vez fingiste que te gustaba alguien?',
-  '¿Qué mentira has dicho para salir de una cita?',
-  '¿Cuál es tu fantasía de viaje romántico?',
-  '¿A quién stalkeas más en redes?',
-  '¿Qué canción te recuerda a un amor pasado?',
-  '¿Cuál ha sido tu momento más incómodo en una fiesta?',
-  '¿Alguna vez te enamoraste de alguien prohibido?',
-  '¿Qué es lo primero que miras en alguien que te gusta?',
-  '¿Cuál es el secreto que nunca le contaste a tus amigos?',
-  '¿Alguna vez diste un beso que te arrepentiste al instante?',
-  '¿Qué apodo cariñoso te han puesto que te da vergüenza?',
+const SOFT_TRUTHS: readonly string[] = [
+  '¿Qué fue lo primero que pensaste de mí cuando me conociste?',
+  '¿Cuál es tu recuerdo favorito de nosotros dos?',
+  '¿Qué canción te recuerda a mí?',
+  '¿Qué es lo que más te gusta de cómo te trato?',
+  '¿Cuál fue el momento en que supiste que te gustaba?',
+  '¿Qué detalle mío te parece adorable y nunca me dijiste?',
+  '¿Qué cita soñada te gustaría que hagamos?',
+  '¿Qué te pone nervioso o nerviosa de mí todavía?',
+  '¿Cuál es tu apodo secreto para mí en tu cabeza?',
+  '¿Qué es lo más romántico que harías por mí sin que te lo pida?',
 ]
 
-const DARES: readonly string[] = [
-  'Dale un abrazo de 10 segundos a la persona de tu derecha.',
-  'Manda un audio cantando a la última persona con la que chateaste.',
-  'Baila 30 segundos sin música.',
-  'Deja que el grupo publique una historia en tu Instagram.',
-  'Imita a alguien de la sala hasta que adivinen quién es.',
-  'Di un piropo a cada persona del grupo.',
-  'Habla con acento extranjero hasta tu próximo turno.',
-  'Muestra la última foto de tu galería.',
-  'Dile a la persona de tu izquierda tu primera impresión de ella.',
-  'Haz 10 sentadillas mientras dices el nombre de tu crush.',
-  'Deja que alguien revise tus últimos 3 emojis más usados.',
-  'Susurra algo bonito al oído de la persona que elija el grupo.',
-  'Cuenta un chiste; si nadie se ríe, cumple otro reto.',
-  'Camina como modelo de pasarela por toda la sala.',
-  'Deja que el grupo te despeine y quédate así una ronda.',
-  'Mira fijo a los ojos a alguien por 30 segundos sin reírte.',
-  'Manda un "te extraño" a un contacto que elija el grupo.',
-  'Declara tu amor dramáticamente a un objeto de la sala.',
-  'Haz tu mejor cara de seducción a la cámara de alguien.',
-  'Intercambia una prenda con la persona de tu derecha por una ronda.',
+const SOFT_DARES: readonly string[] = [
+  'Dame un abrazo de 20 segundos sin decir nada.',
+  'Dime tres cosas que amas de mí mirándome a los ojos.',
+  'Dame un beso en la frente y otro donde quieras.',
+  'Baila conmigo 30 segundos sin música.',
+  'Hazme un masaje de manos mientras me cuentas tu día.',
+  'Susúrrame algo lindo al oído.',
+  'Recrea nuestro primer beso.',
+  'Escríbeme un piropo y léelo en voz alta.',
+  'Dame de comer algo con los ojos vendados.',
+  'Abrázame por la espalda durante un minuto entero.',
 ]
+
+const SPICY_TRUTHS: readonly string[] = [
+  '¿Qué parte de mi cuerpo te gusta más y por qué?',
+  '¿Dónde fue el lugar más arriesgado donde quisiste besarme?',
+  '¿Qué prenda mía te gustaría que use más seguido?',
+  '¿Qué fantasía conmigo todavía no me contaste?',
+  '¿Qué es lo primero que me mirás cuando me ves llegar?',
+  '¿Cuál fue el beso que más te gustó de todos los que nos dimos?',
+  '¿Qué escena de película te gustaría recrear conmigo?',
+  '¿En qué momento del día pensás más en mí?',
+  '¿Qué te gustaría que te haga más seguido?',
+  '¿Cuál es tu recuerdo más picante de nosotros?',
+]
+
+const SPICY_DARES: readonly string[] = [
+  'Besa mi cuello durante 15 segundos.',
+  'Dime al oído qué harías si estuviéramos solos ahora mismo.',
+  'Quítame una prenda con delicadeza.',
+  'Hazme un masaje en la espalda de dos minutos.',
+  'Muerde suavemente mi labio.',
+  'Recorre mi brazo con besos, de la mano al hombro.',
+  'Elegí una canción y bailámela solo a mí.',
+  'Besa tres lugares de mi cuerpo que elijas vos.',
+  'Miradas fijas: el primero que se ría paga una prenda.',
+  'Describe con detalle cómo sería una noche perfecta conmigo.',
+]
+
+const FIRE_TRUTHS: readonly string[] = [
+  '¿Cuál es tu fantasía más atrevida conmigo?',
+  '¿Qué lugar fuera de casa te tienta para una aventura?',
+  '¿Qué es lo más osado que te gustaría probar juntos?',
+  '¿Qué te vuelve loco o loca que yo haga cuando estamos solos?',
+  '¿Cuál fue la vez que más me deseaste?',
+  '¿Qué juego o rol te gustaría que probemos?',
+  '¿Qué parte de tu cuerpo querés que explore más?',
+  '¿Qué límite te gustaría empujar esta noche?',
+  '¿Cómo me seducirías si fuéramos desconocidos en un bar?',
+  '¿Qué es lo que nunca te animaste a pedirme?',
+]
+
+const FIRE_DARES: readonly string[] = [
+  'Besa mi zona favorita — adivina cuál es.',
+  'Susúrrame tu fantasía más atrevida con todos los detalles.',
+  'Dame un masaje donde yo elija, con los ojos vendados.',
+  'Recorre mi cuerpo solo con la punta de los dedos, un minuto.',
+  'Interpretemos desconocidos que se acaban de conocer.',
+  'Elige tres zonas mías y bésalas lentamente.',
+  'Deja que te quite una prenda como yo quiera.',
+  'Dime tres cosas que querés que pasen esta noche.',
+  'Un minuto de besos sin usar las manos.',
+  'Sella un pacto: cumplir hoy la fantasía que saque esta carta.',
+]
+
+function toPrompts(
+  texts: readonly string[],
+  kind: PromptKind,
+  level: IntensityLevel,
+): readonly Prompt[] {
+  return texts.map((text) => ({ kind, level, text }))
+}
 
 const PROMPTS: readonly Prompt[] = [
-  ...TRUTHS.map((text): Prompt => ({ kind: 'truth', text })),
-  ...DARES.map((text): Prompt => ({ kind: 'dare', text })),
+  ...toPrompts(SOFT_TRUTHS, 'truth', 'soft'),
+  ...toPrompts(SOFT_DARES, 'dare', 'soft'),
+  ...toPrompts(SPICY_TRUTHS, 'truth', 'spicy'),
+  ...toPrompts(SPICY_DARES, 'dare', 'spicy'),
+  ...toPrompts(FIRE_TRUTHS, 'truth', 'fire'),
+  ...toPrompts(FIRE_DARES, 'dare', 'fire'),
 ]
 
 export function createStaticPromptRepository(): PromptRepository {

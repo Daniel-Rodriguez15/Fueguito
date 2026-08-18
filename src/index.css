@@ -365,3 +365,9 @@ body {
   font-size: 1.15rem;
   font-weight: 700;
 }
+
+.level-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}

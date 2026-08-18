@@ -1,17 +1,43 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native'
-import { rollDice } from '@/domain/dice'
+import type { Pose, PoseCatalog } from '@/domain/pose'
+import type { CollectionState } from '@/domain/pose-collection'
 import type { RandomSource } from '@/domain/random'
+import { randomIndex } from '@/domain/random'
+import { rollActionZone, type ActionZoneRoll } from '@/domain/sex-dice'
 import { BackButton } from '../components/BackButton'
-import { Die } from '../components/Die'
+import { PoseFigure } from '../components/PoseFigure'
 import { colors, radius } from '../theme'
 
 const ROLL_DURATION_MS = 600
-const DICE_COUNTS = [1, 2] as const
 
-export function DiceScreen({ random, onBack }: { random: RandomSource; onBack: () => void }) {
-  const [count, setCount] = useState<number>(2)
-  const [values, setValues] = useState<number[] | null>(null)
+type DiceMode = 'classic' | 'poses'
+
+function TextDie({ label, value, hint }: { label: string; value: string | null; hint: string }) {
+  return (
+    <View style={styles.textDie}>
+      <Text style={styles.textDieLabel}>{label}</Text>
+      <Text style={styles.textDieValue}>{value ?? hint}</Text>
+    </View>
+  )
+}
+
+export function DiceScreen({
+  random,
+  catalog,
+  collection,
+  onBack,
+  onGoToCollection,
+}: {
+  random: RandomSource
+  catalog: PoseCatalog
+  collection: CollectionState
+  onBack: () => void
+  onGoToCollection: () => void
+}) {
+  const [mode, setMode] = useState<DiceMode>('classic')
+  const [roll, setRoll] = useState<ActionZoneRoll | null>(null)
+  const [pose, setPose] = useState<Pose | null>(null)
   const [rolling, setRolling] = useState(false)
   const shake = useRef(new Animated.Value(0)).current
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -26,7 +52,9 @@ export function DiceScreen({ random, onBack }: { random: RandomSource; onBack: (
     [shake],
   )
 
-  const roll = () => {
+  const unlockedPoses = catalog.getPoses().filter((p) => p.id in collection.entries)
+
+  const startRoll = (onDone: () => void) => {
     if (rolling) {
       return
     }
@@ -42,57 +70,93 @@ export function DiceScreen({ random, onBack }: { random: RandomSource; onBack: (
     timerRef.current = setTimeout(() => {
       shake.stopAnimation()
       shake.setValue(0)
-      setValues(rollDice(count, random))
+      onDone()
       setRolling(false)
     }, ROLL_DURATION_MS)
   }
 
-  const selectCount = (nextCount: number) => {
+  const rollClassic = () => startRoll(() => setRoll(rollActionZone(random)))
+
+  const rollPose = () => {
+    if (unlockedPoses.length === 0) {
+      return
+    }
+    startRoll(() => setPose(unlockedPoses[randomIndex(unlockedPoses.length, random)]))
+  }
+
+  const selectMode = (next: DiceMode) => {
     if (rolling) {
       return
     }
-    setCount(nextCount)
-    setValues(null)
+    setMode(next)
   }
 
-  const rotate = shake.interpolate({ inputRange: [-1, 1], outputRange: ['-6deg', '6deg'] })
-  const total = values && count > 1 ? values.reduce((sum, value) => sum + value, 0) : null
+  const rotate = shake.interpolate({ inputRange: [-1, 1], outputRange: ['-5deg', '5deg'] })
+  const canRollPoses = unlockedPoses.length > 0
 
   return (
     <View style={styles.screen}>
       <BackButton onBack={onBack} />
-      <Text style={styles.title}>Dados</Text>
+      <Text style={styles.title}>Dados Hot</Text>
 
-      <View style={styles.countRow}>
-        {DICE_COUNTS.map((option) => (
-          <Pressable
-            key={option}
-            style={[styles.countButton, count === option && styles.countButtonActive]}
-            onPress={() => selectCount(option)}
-          >
-            <Text style={styles.countLabel}>
-              {option} {option === 1 ? 'dado' : 'dados'}
-            </Text>
-          </Pressable>
-        ))}
+      <View style={styles.modeRow}>
+        <Pressable
+          style={[styles.modeButton, mode === 'classic' && styles.modeButtonActive]}
+          onPress={() => selectMode('classic')}
+        >
+          <Text style={styles.modeLabel}>🎲 Clásico</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.modeButton, mode === 'poses' && styles.modeButtonActive]}
+          onPress={() => selectMode('poses')}
+        >
+          <Text style={styles.modeLabel}>🃏 Poses</Text>
+        </Pressable>
       </View>
 
       <View style={styles.body}>
-        <Animated.View style={[styles.diceRow, { transform: [{ rotate }] }]}>
-          {Array.from({ length: count }, (_, index) => (
-            <Die key={index} value={values?.[index] ?? null} />
-          ))}
-        </Animated.View>
-        <Text style={styles.total} accessibilityLiveRegion="polite">
-          {total !== null ? `Total: ${total}` : ' '}
-        </Text>
+        {mode === 'classic' ? (
+          <Animated.View style={[styles.classicRow, { transform: [{ rotate }] }]}>
+            <TextDie label="Acción" value={roll?.action ?? null} hint="?" />
+            <TextDie label="Zona" value={roll?.zone ?? null} hint="?" />
+          </Animated.View>
+        ) : canRollPoses ? (
+          <Animated.View style={[styles.poseCard, { transform: [{ rotate }] }]}>
+            {pose ? (
+              <>
+                <PoseFigure art={pose.art} catalog={catalog} size={170} />
+                <Text style={styles.poseName}>{pose.name}</Text>
+                <Text style={styles.poseDescription}>{pose.description}</Text>
+                <Text style={styles.poseSpice}>{'🔥'.repeat(pose.spice)}</Text>
+              </>
+            ) : (
+              <Text style={styles.hint}>Lanza el dado y que la suerte elija la pose</Text>
+            )}
+          </Animated.View>
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.hint}>Todavía no tienen poses desbloqueadas.</Text>
+            <Pressable style={styles.linkButton} onPress={onGoToCollection}>
+              <Text style={styles.linkLabel}>Ir a la Colección 🎁</Text>
+            </Pressable>
+          </View>
+        )}
       </View>
+
+      {mode === 'classic' && roll && !rolling && (
+        <Text style={styles.resultLine} accessibilityLiveRegion="polite">
+          {roll.action} {roll.zone} 🔥
+        </Text>
+      )}
 
       <View style={styles.actionRow}>
         <Pressable
-          style={[styles.rollButton, rolling && styles.rollButtonDisabled]}
-          onPress={roll}
-          disabled={rolling}
+          style={[
+            styles.rollButton,
+            (rolling || (mode === 'poses' && !canRollPoses)) && styles.rollButtonDisabled,
+          ]}
+          onPress={mode === 'classic' ? rollClassic : rollPose}
+          disabled={rolling || (mode === 'poses' && !canRollPoses)}
         >
           <Text style={styles.rollLabel}>{rolling ? 'Rodando…' : 'Lanzar'}</Text>
         </Pressable>
@@ -105,7 +169,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     padding: 20,
-    gap: 20,
+    gap: 16,
   },
   title: {
     color: colors.text,
@@ -113,21 +177,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
-  countRow: {
+  modeRow: {
     flexDirection: 'row',
     gap: 8,
     justifyContent: 'center',
   },
-  countButton: {
+  modeButton: {
     paddingVertical: 8,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     borderRadius: radius,
     backgroundColor: colors.surface,
   },
-  countButtonActive: {
+  modeButtonActive: {
     backgroundColor: colors.fire,
   },
-  countLabel: {
+  modeLabel: {
     color: colors.text,
     fontWeight: '600',
   },
@@ -135,17 +199,81 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 24,
   },
-  diceRow: {
+  classicRow: {
     flexDirection: 'row',
-    gap: 20,
+    gap: 16,
   },
-  total: {
+  textDie: {
+    width: 140,
+    height: 140,
+    borderRadius: 22,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: 12,
+  },
+  textDieLabel: {
+    color: colors.textDim,
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  textDieValue: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  poseCard: {
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: colors.bgCard,
+    borderRadius: radius,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 20,
+    width: '100%',
+  },
+  poseName: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  poseDescription: {
+    color: colors.textDim,
+    textAlign: 'center',
+  },
+  poseSpice: {
+    fontSize: 16,
+  },
+  emptyState: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  hint: {
+    color: colors.textDim,
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  linkButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: radius,
+    backgroundColor: colors.surface,
+  },
+  linkLabel: {
+    color: colors.text,
+    fontWeight: '700',
+  },
+  resultLine: {
     color: colors.text,
     fontSize: 18,
     fontWeight: '700',
-    minHeight: 24,
+    textAlign: 'center',
   },
   actionRow: {
     alignItems: 'center',

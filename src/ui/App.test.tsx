@@ -6,7 +6,7 @@ import { App } from './App'
 function createTestDeps(): AppDependencies {
   return {
     truthOrDare: {
-      draw: (kind) => ({ kind, text: `sample ${kind}` }),
+      draw: (kind, level) => ({ kind, level, text: `sample ${kind}` }),
     },
     random: () => 0.5,
   }

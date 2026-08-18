@@ -1,17 +1,36 @@
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { TruthOrDareGame } from '@/application/truth-or-dare-game'
-import type { Prompt } from '@/domain/truth-or-dare'
+import type { IntensityLevel, Prompt } from '@/domain/truth-or-dare'
 import { BackButton } from '../components/BackButton'
 import { colors, radius } from '../theme'
 
+const LEVELS: ReadonlyArray<{ id: IntensityLevel; label: string }> = [
+  { id: 'soft', label: '😊 Suave' },
+  { id: 'spicy', label: '🌶️ Picante' },
+  { id: 'fire', label: '🔥 Fuego' },
+]
+
 export function TruthOrDareScreen({ game, onBack }: { game: TruthOrDareGame; onBack: () => void }) {
+  const [level, setLevel] = useState<IntensityLevel>('soft')
   const [prompt, setPrompt] = useState<Prompt | null>(null)
 
   return (
     <View style={styles.screen}>
       <BackButton onBack={onBack} />
       <Text style={styles.title}>Verdad o Reto</Text>
+
+      <View style={styles.levelRow}>
+        {LEVELS.map((option) => (
+          <Pressable
+            key={option.id}
+            style={[styles.levelButton, level === option.id && styles.levelButtonActive]}
+            onPress={() => setLevel(option.id)}
+          >
+            <Text style={styles.levelLabel}>{option.label}</Text>
+          </Pressable>
+        ))}
+      </View>
 
       <View style={styles.body}>
         {prompt ? (
@@ -25,20 +44,20 @@ export function TruthOrDareScreen({ game, onBack }: { game: TruthOrDareGame; onB
             <Text style={styles.promptText}>{prompt.text}</Text>
           </View>
         ) : (
-          <Text style={styles.hint}>Pasa el teléfono y elige tu destino</Text>
+          <Text style={styles.hint}>Elijan nivel y su destino</Text>
         )}
       </View>
 
       <View style={styles.actionRow}>
         <Pressable
           style={[styles.button, { backgroundColor: colors.truth }]}
-          onPress={() => setPrompt(game.draw('truth'))}
+          onPress={() => setPrompt(game.draw('truth', level))}
         >
           <Text style={styles.buttonLabel}>Verdad</Text>
         </Pressable>
         <Pressable
           style={[styles.button, { backgroundColor: colors.dare }]}
-          onPress={() => setPrompt(game.draw('dare'))}
+          onPress={() => setPrompt(game.draw('dare', level))}
         >
           <Text style={styles.buttonLabel}>Reto</Text>
         </Pressable>
@@ -58,6 +77,24 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '700',
     textAlign: 'center',
+  },
+  levelRow: {
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+  },
+  levelButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: radius,
+    backgroundColor: colors.surface,
+  },
+  levelButtonActive: {
+    backgroundColor: colors.fire,
+  },
+  levelLabel: {
+    color: colors.text,
+    fontWeight: '600',
   },
   body: {
     flex: 1,
