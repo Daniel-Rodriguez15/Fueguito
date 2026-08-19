@@ -7,25 +7,21 @@ import { randomIndex } from '@/domain/random'
 import { rollActionZone, type ActionZoneRoll } from '@/domain/sex-dice'
 import { BackButton } from '../components/BackButton'
 import { PoseArt } from '../components/PoseArt'
-import { colors, radius } from '../theme'
+import { SpiceDots } from '../components/SpiceDots'
+import { colors, fonts, radii } from '../theme'
 
 const ROLL_DURATION_MS = 600
 
 type DiceMode = 'classic' | 'poses'
 
-// Icons indexed to match DICE_ACTIONS / DICE_ZONES in the domain.
-const ACTION_ICONS: readonly string[] = ['💋', '👅', '😈', '💆', '🤲', '💨']
-const ZONE_ICONS: readonly string[] = ['🧣', '👂', '🫦', '🫂', '🔥', '🦵']
-
-function TextDie({ label, icon, value }: { label: string; icon: string | null; value: string | null }) {
+function TextDie({ label, value }: { label: string; value: string | null }) {
   return (
     <View style={styles.textDie}>
       <View style={styles.textDieCorner}>
         <View style={styles.textDiePip} />
       </View>
-      <Text style={styles.textDieIcon}>{icon ?? '🎲'}</Text>
-      <Text style={styles.textDieValue}>{value ?? '¿?'}</Text>
       <Text style={styles.textDieLabel}>{label}</Text>
+      <Text style={styles.textDieValue}>{value ?? '—'}</Text>
       <View style={[styles.textDieCorner, styles.textDieCornerBottom]}>
         <View style={styles.textDiePip} />
       </View>
@@ -111,36 +107,28 @@ export function DiceScreen({
   return (
     <View style={styles.screen}>
       <BackButton onBack={onBack} />
-      <Text style={styles.title}>Dados Hot</Text>
+      <Text style={styles.title}>Dados</Text>
 
       <View style={styles.modeRow}>
         <Pressable
           style={[styles.modeButton, mode === 'classic' && styles.modeButtonActive]}
           onPress={() => selectMode('classic')}
         >
-          <Text style={styles.modeLabel}>🎲 Clásico</Text>
+          <Text style={[styles.modeLabel, mode === 'classic' && styles.modeLabelActive]}>Clásico</Text>
         </Pressable>
         <Pressable
           style={[styles.modeButton, mode === 'poses' && styles.modeButtonActive]}
           onPress={() => selectMode('poses')}
         >
-          <Text style={styles.modeLabel}>🃏 Poses</Text>
+          <Text style={[styles.modeLabel, mode === 'poses' && styles.modeLabelActive]}>Poses</Text>
         </Pressable>
       </View>
 
       <View style={styles.body}>
         {mode === 'classic' ? (
           <Animated.View style={[styles.classicRow, { transform: [{ rotate }] }]}>
-            <TextDie
-              label="Acción"
-              icon={roll ? ACTION_ICONS[roll.actionIndex] : null}
-              value={roll?.action ?? null}
-            />
-            <TextDie
-              label="Zona"
-              icon={roll ? ZONE_ICONS[roll.zoneIndex] : null}
-              value={roll?.zone ?? null}
-            />
+            <TextDie label="Acción" value={roll?.action ?? null} />
+            <TextDie label="Zona" value={roll?.zone ?? null} />
           </Animated.View>
         ) : canRollPoses ? (
           <Animated.View style={[styles.poseCard, { transform: [{ rotate }] }]}>
@@ -150,7 +138,7 @@ export function DiceScreen({
                 <Text style={styles.poseName}>{pose.name}</Text>
                 <Text style={styles.poseDescription}>{pose.description}</Text>
                 <Text style={styles.poseHowTo}>{pose.howTo}</Text>
-                <Text style={styles.poseSpice}>{'🔥'.repeat(pose.spice)}</Text>
+                <SpiceDots spice={pose.spice} />
               </>
             ) : (
               <Text style={styles.hint}>Lanza el dado y que la suerte elija la pose</Text>
@@ -160,7 +148,7 @@ export function DiceScreen({
           <View style={styles.emptyState}>
             <Text style={styles.hint}>Todavía no tienen poses desbloqueadas.</Text>
             <Pressable style={styles.linkButton} onPress={onGoToCollection}>
-              <Text style={styles.linkLabel}>Ir a la Colección 🎁</Text>
+              <Text style={styles.linkLabel}>Ir a la Colección</Text>
             </Pressable>
           </View>
         )}
@@ -168,7 +156,7 @@ export function DiceScreen({
 
       {mode === 'classic' && roll && !rolling && (
         <Text style={styles.resultLine} accessibilityLiveRegion="polite">
-          {roll.action} {roll.zone} 🔥
+          {roll.action} {roll.zone}
         </Text>
       )}
 
@@ -195,9 +183,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   title: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 26,
-    fontWeight: '700',
+    fontSize: 30,
     textAlign: 'center',
   },
   modeRow: {
@@ -206,17 +194,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: radius,
-    backgroundColor: colors.surface,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: radii.pill,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
   },
   modeButtonActive: {
     backgroundColor: colors.fire,
+    borderColor: colors.fire,
   },
   modeLabel: {
-    color: colors.text,
-    fontWeight: '600',
+    fontFamily: fonts.medium,
+    color: colors.textDim,
+    fontSize: 13,
+  },
+  modeLabelActive: {
+    color: colors.onFire,
   },
   body: {
     flex: 1,
@@ -230,19 +225,14 @@ const styles = StyleSheet.create({
   textDie: {
     width: 150,
     height: 170,
-    borderRadius: 24,
+    borderRadius: radii.large,
     backgroundColor: colors.bgCard,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderStrong,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    padding: 12,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.45,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    gap: 10,
+    padding: 14,
   },
   textDieCorner: {
     position: 'absolute',
@@ -256,32 +246,30 @@ const styles = StyleSheet.create({
     right: 10,
   },
   textDiePip: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
     backgroundColor: colors.fire,
-    opacity: 0.5,
-  },
-  textDieIcon: {
-    fontSize: 46,
   },
   textDieValue: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 19,
-    fontWeight: '800',
+    fontSize: 26,
+    lineHeight: 31,
     textAlign: 'center',
   },
   textDieLabel: {
+    fontFamily: fonts.body,
     color: colors.textDim,
-    fontSize: 11,
+    fontSize: 11.5,
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 2.3,
   },
   poseCard: {
     alignItems: 'center',
     gap: 8,
     backgroundColor: colors.bgCard,
-    borderRadius: radius,
+    borderRadius: radii.medium,
     borderWidth: 1,
     borderColor: colors.border,
     padding: 20,
@@ -290,7 +278,7 @@ const styles = StyleSheet.create({
   poseName: {
     color: colors.text,
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
   },
   poseDescription: {
     color: colors.textDim,
@@ -317,17 +305,17 @@ const styles = StyleSheet.create({
   linkButton: {
     paddingVertical: 10,
     paddingHorizontal: 18,
-    borderRadius: radius,
+    borderRadius: radii.medium,
     backgroundColor: colors.surface,
   },
   linkLabel: {
     color: colors.text,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
   },
   resultLine: {
     color: colors.text,
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
     textAlign: 'center',
   },
   actionRow: {
@@ -336,16 +324,16 @@ const styles = StyleSheet.create({
   },
   rollButton: {
     backgroundColor: colors.fire,
-    paddingVertical: 15,
+    paddingVertical: 17,
     paddingHorizontal: 48,
-    borderRadius: radius,
+    borderRadius: radii.pill,
   },
   rollButtonDisabled: {
     opacity: 0.45,
   },
   rollLabel: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
+    color: colors.onFire,
+    fontSize: 16,
   },
 })

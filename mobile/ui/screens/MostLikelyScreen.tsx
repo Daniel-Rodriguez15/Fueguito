@@ -4,7 +4,7 @@ import type { RandomSource } from '@/domain/random'
 import { createShuffledDeck } from '@/domain/simple-deck'
 import { MOST_LIKELY_QUESTIONS } from '@/infrastructure/most-likely-questions'
 import { BackButton } from '../components/BackButton'
-import { colors, radius } from '../theme'
+import { colors, fonts, radii } from '../theme'
 
 export function MostLikelyScreen({
   random,
@@ -31,8 +31,8 @@ export function MostLikelyScreen({
       <View style={styles.body}>
         {question ? (
           <View style={styles.card}>
-            <Text style={styles.cardIcon}>👉</Text>
-            <Text style={styles.question}>{question}</Text>
+            <Text style={styles.cardLabel}>¿Quién es más probable...?</Text>
+            <Text style={styles.question}>{question.replace('¿Quién es más probable que ', '¿...que ')}</Text>
             <Text style={styles.hintSmall}>A la cuenta de tres, señalen al culpable</Text>
           </View>
         ) : (
@@ -58,9 +58,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   title: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 30,
     textAlign: 'center',
   },
   body: {
@@ -80,21 +80,23 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.bgCard,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius,
+    borderColor: colors.borderStrong,
+    borderRadius: radii.large,
     padding: 26,
-    alignItems: 'center',
-    gap: 14,
+    gap: 12,
   },
-  cardIcon: {
-    fontSize: 36,
+  cardLabel: {
+    fontFamily: fonts.body,
+    color: colors.textDim,
+    fontSize: 11.5,
+    letterSpacing: 2.3,
+    textTransform: 'uppercase',
   },
   question: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 21,
-    lineHeight: 30,
-    textAlign: 'center',
-    fontWeight: '600',
+    fontSize: 27,
+    lineHeight: 34,
   },
   actionRow: {
     alignItems: 'center',
@@ -102,13 +104,13 @@ const styles = StyleSheet.create({
   },
   drawButton: {
     backgroundColor: colors.fire,
-    paddingVertical: 15,
+    paddingVertical: 17,
     paddingHorizontal: 48,
-    borderRadius: radius,
+    borderRadius: radii.pill,
   },
   drawLabel: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
+    color: colors.onFire,
+    fontSize: 16,
   },
 })

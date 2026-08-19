@@ -4,7 +4,7 @@ import { MIN_BOTTLE_PLAYERS, spinBottle } from '@/domain/bottle'
 import type { RandomSource } from '@/domain/random'
 import { BackButton } from '../components/BackButton'
 import { Bottle } from '../components/Bottle'
-import { colors, radius } from '../theme'
+import { colors, fonts, radii } from '../theme'
 
 const SPIN_EXTRA_TURNS = 4
 const SPIN_DURATION_MS = 3000
@@ -135,7 +135,7 @@ export function BottleScreen({
         <Text style={styles.hint}>Agrega al menos {MIN_BOTTLE_PLAYERS} jugadores</Text>
       ) : (
         <Text style={styles.result} accessibilityLiveRegion="polite">
-          {pair !== null ? `¡${players[pair.tip]} y ${players[pair.base]} se besan! 💋` : ' '}
+          {pair !== null ? `¡${players[pair.tip]} y ${players[pair.base]} se besan!` : ' '}
         </Text>
       )}
 
@@ -162,9 +162,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   title: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 26,
-    fontWeight: '700',
+    fontSize: 30,
     textAlign: 'center',
   },
   form: {
@@ -177,19 +177,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius,
+    borderRadius: radii.medium,
     backgroundColor: colors.surface,
     color: colors.text,
   },
   addButton: {
     justifyContent: 'center',
     paddingHorizontal: 16,
-    borderRadius: radius,
+    borderRadius: radii.medium,
     backgroundColor: colors.surface,
   },
   addLabel: {
     color: colors.text,
-    fontWeight: '600',
+    fontFamily: fonts.medium,
   },
   circle: {
     width: CIRCLE_SIZE,
@@ -211,14 +211,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.fire,
   },
   chipChosenBase: {
-    backgroundColor: colors.dare,
+    backgroundColor: colors.violet,
   },
   chipLabel: {
     color: colors.text,
     fontSize: 13,
   },
   chipLabelChosen: {
-    fontWeight: '700',
+    fontFamily: fonts.medium,
   },
   bottle: {
     alignItems: 'center',
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   result: {
     color: colors.text,
     fontSize: 17,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
     textAlign: 'center',
     minHeight: 24,
   },
@@ -240,16 +240,16 @@ const styles = StyleSheet.create({
   },
   spinButton: {
     backgroundColor: colors.fire,
-    paddingVertical: 15,
+    paddingVertical: 17,
     paddingHorizontal: 48,
-    borderRadius: radius,
+    borderRadius: radii.pill,
   },
   spinButtonDisabled: {
     opacity: 0.45,
   },
   spinLabel: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
+    color: colors.onFire,
+    fontSize: 16,
   },
 })

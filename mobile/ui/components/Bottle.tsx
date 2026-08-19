@@ -1,4 +1,4 @@
-import Svg, { Defs, LinearGradient, Path, Rect, Stop, Text as SvgText } from 'react-native-svg'
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg'
 
 /** Glass bottle pictogram pointing up; the parent rotates it when spinning. */
 export function Bottle({ width = 46 }: { width?: number }) {
@@ -23,10 +23,11 @@ export function Bottle({ width = 46 }: { width?: number }) {
         fill="url(#glass)"
       />
       <Rect x={10} y={56} width={5} height={44} rx={2.5} fill="rgba(255, 255, 255, 0.3)" />
-      <Rect x={11} y={62} width={24} height={26} rx={5} fill="#f6ead0" />
-      <SvgText x={23} y={81} fontSize={15} textAnchor="middle">
-        🔥
-      </SvgText>
+      <Rect x={11} y={62} width={24} height={26} rx={5} fill="#F3E9E2" />
+      <Path
+        d="M23 66 C24.5 68.5 26.5 70.5 26.5 73.5 C26.5 76.2 25 78 23 78 C21 78 19.5 76.2 19.5 73.5 C19.5 71.7 20.4 70.4 21.3 69 C21.7 70 22.3 70.3 22.5 69.4 C22.7 68.4 22.8 67.3 23 66 Z"
+        fill="#EE6E3E"
+      />
     </Svg>
   )
 }

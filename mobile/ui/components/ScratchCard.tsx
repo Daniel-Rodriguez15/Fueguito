@@ -114,10 +114,10 @@ export function ScratchCard({
           <Svg width={width} height={height} pointerEvents="none">
             <Defs>
               <LinearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0" stopColor="#8a6273" />
-                <Stop offset="0.45" stopColor="#6d4d5d" />
-                <Stop offset="0.55" stopColor="#7d5a6b" />
-                <Stop offset="1" stopColor="#553a49" />
+                <Stop offset="0" stopColor="#2A211F" />
+                <Stop offset="0.45" stopColor="#1F1817" />
+                <Stop offset="0.55" stopColor="#241C1A" />
+                <Stop offset="1" stopColor="#17110F" />
               </LinearGradient>
               <Mask id="scratch">
                 <Rect x={0} y={0} width={width} height={height} fill="#fff" />
@@ -146,7 +146,6 @@ export function ScratchCard({
           </Svg>
           {strokes.length === 0 && (
             <View style={styles.hintWrap} pointerEvents="none">
-              <Text style={styles.hintIcon}>🎁</Text>
               <Text style={styles.hint}>Raspa con el dedo</Text>
             </View>
           )}
@@ -167,12 +166,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
   },
-  hintIcon: {
-    fontSize: 34,
-  },
   hint: {
-    color: colors.text,
-    fontWeight: '700',
-    fontSize: 16,
+    color: colors.textDim,
+    fontSize: 14.5,
   },
 })

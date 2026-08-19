@@ -1,5 +1,8 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { colors, radius } from '../theme'
+import type { NightLogState } from '@/domain/night-log'
+import { GameIcon, type GameIconId } from '../components/GameIcon'
+import { MiniCalendar } from '../components/MiniCalendar'
+import { colors, fonts, radii } from '../theme'
 
 export type GameId =
   | 'truth-or-dare'
@@ -10,23 +13,29 @@ export type GameId =
   | 'most-likely'
   | 'roulette'
 
-const GAMES: ReadonlyArray<{ id: GameId; icon: string; name: string; tagline: string }> = [
-  { id: 'truth-or-dare', icon: '🎭', name: 'Verdad o Reto', tagline: 'Suave, picante o fuego' },
-  { id: 'dice', icon: '🎲', name: 'Dados Hot', tagline: 'Acción, zona… o pose' },
-  { id: 'collection', icon: '🎁', name: 'Colección', tagline: 'Raspa y descubre poses' },
-  { id: 'most-likely', icon: '👉', name: '¿Más Probable?', tagline: 'Señalen al culpable' },
-  { id: 'roulette', icon: '⏱️', name: 'Ruleta Rápida', tagline: 'Retos contra el reloj' },
-  { id: 'bottle', icon: '🍾', name: 'Pico Botella', tagline: 'La botella empareja' },
-  { id: 'calendar', icon: '📅', name: 'Calentadario', tagline: 'Su racha de fuego' },
+const GAMES: ReadonlyArray<{ id: GameIconId; name: string; tagline: string }> = [
+  { id: 'truth-or-dare', name: 'Verdad o Reto', tagline: 'Suave, picante o fuego' },
+  { id: 'dice', name: 'Dados', tagline: 'Acción, zona o pose' },
+  { id: 'collection', name: 'Colección', tagline: 'Raspa y descubre poses' },
+  { id: 'most-likely', name: '¿Más probable?', tagline: 'Señalen al culpable' },
+  { id: 'roulette', name: 'Contrarreloj', tagline: 'Un reto, un tiempo' },
+  { id: 'bottle', name: 'Pico Botella', tagline: 'La botella empareja' },
 ]
 
-export function HomeScreen({ onSelectGame }: { onSelectGame: (game: GameId) => void }) {
+export function HomeScreen({
+  onSelectGame,
+  nightLog,
+}: {
+  onSelectGame: (game: GameId) => void
+  nightLog: NightLogState
+}) {
   return (
     <ScrollView contentContainerStyle={styles.screen}>
       <View style={styles.header}>
+        <Text style={styles.kicker}>Juegos para dos</Text>
         <Text style={styles.title}>Fueguito</Text>
-        <Text style={styles.subtitle}>Juegos para encender la noche en pareja 🔥</Text>
       </View>
+      <MiniCalendar log={nightLog} onPress={() => onSelectGame('calendar')} />
       <View style={styles.grid}>
         {GAMES.map((game) => (
           <Pressable
@@ -34,7 +43,7 @@ export function HomeScreen({ onSelectGame }: { onSelectGame: (game: GameId) => v
             style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
             onPress={() => onSelectGame(game.id)}
           >
-            <Text style={styles.icon}>{game.icon}</Text>
+            <GameIcon id={game.id} />
             <Text style={styles.name}>{game.name}</Text>
             <Text style={styles.tagline}>{game.tagline}</Text>
           </Pressable>
@@ -47,21 +56,25 @@ export function HomeScreen({ onSelectGame }: { onSelectGame: (game: GameId) => v
 const styles = StyleSheet.create({
   screen: {
     padding: 20,
-    gap: 24,
+    gap: 20,
   },
   header: {
     alignItems: 'center',
-    paddingTop: 28,
+    paddingTop: 26,
+    gap: 10,
+  },
+  kicker: {
+    fontFamily: fonts.body,
+    fontSize: 11.5,
+    letterSpacing: 2.6,
+    textTransform: 'uppercase',
+    color: colors.textDim,
   },
   title: {
-    fontSize: 46,
-    fontWeight: '800',
-    color: colors.fire,
-  },
-  subtitle: {
-    marginTop: 6,
-    color: colors.textDim,
-    fontSize: 14,
+    fontFamily: fonts.display,
+    fontSize: 58,
+    lineHeight: 58,
+    color: colors.text,
   },
   grid: {
     flexDirection: 'row',
@@ -71,8 +84,8 @@ const styles = StyleSheet.create({
   card: {
     width: '48%',
     flexGrow: 1,
-    padding: 16,
-    borderRadius: radius,
+    padding: 18,
+    borderRadius: radii.medium,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.bgCard,
@@ -81,16 +94,15 @@ const styles = StyleSheet.create({
   cardPressed: {
     borderColor: colors.fire,
   },
-  icon: {
-    fontSize: 28,
-  },
   name: {
+    fontFamily: fonts.medium,
     color: colors.text,
     fontSize: 15,
-    fontWeight: '700',
+    marginTop: 10,
   },
   tagline: {
+    fontFamily: fonts.body,
     color: colors.textDim,
-    fontSize: 12,
+    fontSize: 12.5,
   },
 })

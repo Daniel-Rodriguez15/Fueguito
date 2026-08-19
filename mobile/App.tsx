@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
+import { useFonts } from 'expo-font'
+import { DMSans_400Regular, DMSans_500Medium } from '@expo-google-fonts/dm-sans'
+import {
+  InstrumentSerif_400Regular,
+  InstrumentSerif_400Regular_Italic,
+} from '@expo-google-fonts/instrument-serif'
 import { createPoseCollectionService } from '@/application/pose-collection-service'
 import { createTruthOrDareGame } from '@/application/truth-or-dare-game'
 import { EMPTY_NIGHT_LOG, logActivity, type NightLogState } from '@/domain/night-log'
@@ -40,6 +46,12 @@ function todayLocal(): string {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    InstrumentSerif_400Regular,
+    InstrumentSerif_400Regular_Italic,
+  })
   const [screen, setScreen] = useState<Screen>('home')
   const [collection, setCollection] = useState<CollectionState>(EMPTY_COLLECTION)
   const [collectionReady, setCollectionReady] = useState(false)
@@ -77,11 +89,15 @@ export default function App() {
     })
   }
 
+  if (!fontsLoaded) {
+    return <View style={styles.root} />
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.root}>
         <StatusBar style="light" />
-        {screen === 'home' && <HomeScreen onSelectGame={setScreen} />}
+        {screen === 'home' && <HomeScreen onSelectGame={setScreen} nightLog={nightLog} />}
         {screen === 'truth-or-dare' && (
           <TruthOrDareScreen
             game={truthOrDare}

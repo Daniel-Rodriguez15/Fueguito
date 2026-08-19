@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { activeDaysInMonth, currentStreak, type NightLogState } from '@/domain/night-log'
+import { activeDaysInMonth, streakInfo, type NightLogState } from '@/domain/night-log'
 import { BackButton } from '../components/BackButton'
-import { colors, radius } from '../theme'
+import { Flame } from '../components/Flame'
+import { colors, fonts, radii } from '../theme'
 
 const GAME_LABELS: Readonly<Record<string, string>> = {
-  'truth-or-dare': '🎭 Verdad o Reto',
-  bottle: '🍾 Pico Botella',
-  dice: '🎲 Dados Hot',
-  collection: '🎁 Colección',
-  'most-likely': '👉 Más Probable',
-  roulette: '⏱️ Ruleta',
+  'truth-or-dare': 'Verdad o Reto',
+  bottle: 'Pico Botella',
+  dice: 'Dados',
+  collection: 'Colección',
+  'most-likely': '¿Más probable?',
+  roulette: 'Contrarreloj',
 }
 
 const MONTH_NAMES = [
@@ -34,7 +35,7 @@ export function CalendarScreen({ log, onBack }: { log: NightLogState; onBack: ()
 
   const yearMonth = `${year}-${String(month).padStart(2, '0')}`
   const activeDays = new Set(activeDaysInMonth(log, yearMonth).map((d) => Number(d.slice(8, 10))))
-  const streak = currentStreak(log, today)
+  const streak = streakInfo(log, today)
 
   const daysInMonth = new Date(year, month, 0).getDate()
   const firstWeekday = (new Date(year, month - 1, 1).getDay() + 6) % 7 // Monday first
@@ -67,7 +68,11 @@ export function CalendarScreen({ log, onBack }: { log: NightLogState; onBack: ()
       <BackButton onBack={onBack} />
       <Text style={styles.title}>Calentadario</Text>
       <Text style={styles.streak}>
-        {streak > 0 ? `Racha: ${streak} ${streak === 1 ? 'día' : 'días'} 🔥` : 'Sin racha… por ahora 😏'}
+        {streak.atRisk
+          ? `Racha de ${streak.length} en peligro: jueguen hoy`
+          : streak.length > 0
+            ? `Racha: ${streak.length} ${streak.length === 1 ? 'día' : 'días'}`
+            : 'Sin racha… por ahora'}
       </Text>
 
       <View style={styles.monthRow}>
@@ -105,8 +110,11 @@ export function CalendarScreen({ log, onBack }: { log: NightLogState; onBack: ()
               style={[styles.cell, isSelected && styles.cellSelected, isToday && styles.cellToday]}
               onPress={() => setSelected(date)}
             >
-              <Text style={[styles.cellDay, active && styles.cellDayActive]}>{day}</Text>
-              {active && <Text style={styles.cellFire}>🔥</Text>}
+              {active ? (
+                <Flame size={28} label={String(day)} />
+              ) : (
+                <Text style={styles.cellDay}>{day}</Text>
+              )}
             </Pressable>
           )
         })}
@@ -135,14 +143,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   title: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 30,
     textAlign: 'center',
   },
   streak: {
     color: colors.fire,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
     textAlign: 'center',
   },
   monthRow: {
@@ -154,13 +162,13 @@ const styles = StyleSheet.create({
   monthArrow: {
     color: colors.text,
     fontSize: 26,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
     paddingHorizontal: 8,
   },
   monthLabel: {
     color: colors.text,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.medium,
     minWidth: 150,
     textAlign: 'center',
   },
@@ -172,7 +180,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.textDim,
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
   },
   grid: {
     flexDirection: 'row',
@@ -198,7 +206,7 @@ const styles = StyleSheet.create({
   },
   cellDayActive: {
     color: colors.text,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
   },
   cellFire: {
     fontSize: 10,
@@ -208,7 +216,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgCard,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius,
+    borderRadius: radii.medium,
     padding: 14,
     gap: 4,
     marginTop: 'auto',
@@ -223,7 +231,7 @@ const styles = StyleSheet.create({
   detailGame: {
     color: colors.text,
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: fonts.medium,
   },
   detailEmpty: {
     color: colors.textDim,

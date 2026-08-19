@@ -3,12 +3,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { TruthOrDareGame } from '@/application/truth-or-dare-game'
 import type { IntensityLevel, Prompt } from '@/domain/truth-or-dare'
 import { BackButton } from '../components/BackButton'
-import { colors, radius } from '../theme'
+import { colors, fonts, radii } from '../theme'
 
-const LEVELS: ReadonlyArray<{ id: IntensityLevel; icon: string; label: string }> = [
-  { id: 'soft', icon: '😊', label: 'Suave' },
-  { id: 'spicy', icon: '🌶️', label: 'Picante' },
-  { id: 'fire', icon: '🔥', label: 'Fuego' },
+const LEVELS: ReadonlyArray<{ id: IntensityLevel; label: string }> = [
+  { id: 'soft', label: 'Suave' },
+  { id: 'spicy', label: 'Picante' },
+  { id: 'fire', label: 'Fuego' },
 ]
 
 export function TruthOrDareScreen({
@@ -35,8 +35,10 @@ export function TruthOrDareScreen({
             style={[styles.levelButton, level === option.id && styles.levelButtonActive]}
             onPress={() => setLevel(option.id)}
           >
-            <Text style={styles.levelIcon}>{option.icon}</Text>
-            <Text style={styles.levelLabel} numberOfLines={1}>
+            <Text
+              style={[styles.levelLabel, level === option.id && styles.levelLabelActive]}
+              numberOfLines={1}
+            >
               {option.label}
             </Text>
           </Pressable>
@@ -45,12 +47,7 @@ export function TruthOrDareScreen({
 
       <View style={styles.body}>
         {prompt ? (
-          <View
-            style={[
-              styles.promptCard,
-              { borderTopColor: prompt.kind === 'truth' ? colors.truth : colors.dare },
-            ]}
-          >
+          <View style={styles.promptCard}>
             <Text style={styles.promptKind}>{prompt.kind === 'truth' ? 'Verdad' : 'Reto'}</Text>
             <Text style={styles.promptText}>{prompt.text}</Text>
           </View>
@@ -61,22 +58,22 @@ export function TruthOrDareScreen({
 
       <View style={styles.actionRow}>
         <Pressable
-          style={[styles.button, { backgroundColor: colors.truth }]}
+          style={[styles.button, styles.buttonOutline]}
           onPress={() => {
             setPrompt(game.draw('truth', level))
             onActivity()
           }}
         >
-          <Text style={styles.buttonLabel}>Verdad</Text>
+          <Text style={[styles.buttonLabel, styles.buttonLabelOutline]}>Verdad</Text>
         </Pressable>
         <Pressable
-          style={[styles.button, { backgroundColor: colors.dare }]}
+          style={[styles.button, styles.buttonFilled]}
           onPress={() => {
             setPrompt(game.draw('dare', level))
             onActivity()
           }}
         >
-          <Text style={styles.buttonLabel}>Reto</Text>
+          <Text style={[styles.buttonLabel, styles.buttonLabelFilled]}>Reto</Text>
         </Pressable>
       </View>
     </View>
@@ -90,9 +87,9 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   title: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 26,
-    fontWeight: '700',
+    fontSize: 30,
     textAlign: 'center',
   },
   levelRow: {
@@ -103,50 +100,55 @@ const styles = StyleSheet.create({
   levelButton: {
     flex: 1,
     alignItems: 'center',
-    gap: 2,
-    paddingVertical: 10,
-    borderRadius: radius,
-    backgroundColor: colors.surface,
+    paddingVertical: 11,
+    borderRadius: radii.pill,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
   },
   levelButtonActive: {
     backgroundColor: colors.fire,
-  },
-  levelIcon: {
-    fontSize: 20,
+    borderColor: colors.fire,
   },
   levelLabel: {
-    color: colors.text,
-    fontWeight: '600',
+    fontFamily: fonts.medium,
+    color: colors.textDim,
     fontSize: 13,
+  },
+  levelLabelActive: {
+    color: colors.onFire,
   },
   body: {
     flex: 1,
     justifyContent: 'center',
   },
   hint: {
+    fontFamily: fonts.body,
     color: colors.textDim,
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 14.5,
+    lineHeight: 23,
   },
   promptCard: {
-    padding: 28,
-    borderRadius: radius,
+    padding: 26,
+    borderRadius: radii.large,
     backgroundColor: colors.bgCard,
-    borderTopWidth: 4,
-    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
     gap: 12,
   },
   promptKind: {
+    fontFamily: fonts.body,
     color: colors.textDim,
-    fontSize: 13,
-    letterSpacing: 2,
+    fontSize: 11.5,
+    letterSpacing: 2.3,
     textTransform: 'uppercase',
   },
   promptText: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 21,
-    lineHeight: 30,
-    textAlign: 'center',
+    fontSize: 27,
+    lineHeight: 34,
   },
   actionRow: {
     flexDirection: 'row',
@@ -155,13 +157,25 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    paddingVertical: 15,
-    borderRadius: radius,
+    paddingVertical: 17,
+    borderRadius: radii.pill,
     alignItems: 'center',
   },
+  buttonOutline: {
+    borderWidth: 1,
+    borderColor: 'rgba(238, 110, 62, 0.4)',
+  },
+  buttonFilled: {
+    backgroundColor: colors.fire,
+  },
   buttonLabel: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
+    fontSize: 16,
+  },
+  buttonLabelOutline: {
+    color: colors.fire,
+  },
+  buttonLabelFilled: {
+    color: colors.onFire,
   },
 })

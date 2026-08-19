@@ -4,7 +4,7 @@ import type { RandomSource } from '@/domain/random'
 import { createShuffledDeck } from '@/domain/simple-deck'
 import { ROULETTE_CHALLENGES, type RouletteChallenge } from '@/infrastructure/roulette-challenges'
 import { BackButton } from '../components/BackButton'
-import { colors, radius } from '../theme'
+import { colors, fonts, radii } from '../theme'
 
 export function RouletteScreen({
   random,
@@ -70,14 +70,14 @@ export function RouletteScreen({
   return (
     <View style={styles.screen}>
       <BackButton onBack={onBack} />
-      <Text style={styles.title}>Ruleta Rápida</Text>
+      <Text style={styles.title}>Contrarreloj</Text>
 
       <View style={styles.body}>
         {challenge ? (
           <View style={styles.card}>
             <Text style={styles.challenge}>{challenge.text}</Text>
             <Text style={[styles.timer, secondsLeft === 0 && styles.timerDone]}>
-              {secondsLeft > 0 ? `${secondsLeft}s` : '¡Tiempo! 🔥'}
+              {secondsLeft > 0 ? `${secondsLeft}s` : '¡Tiempo!'}
             </Text>
             <View style={styles.track}>
               <Animated.View style={[styles.fill, { width: barWidth }]} />
@@ -85,7 +85,7 @@ export function RouletteScreen({
           </View>
         ) : (
           <Text style={styles.hint}>
-            Un reto corto, un temporizador y cero excusas. Giren y cumplan.
+            Un reto corto, un temporizador y cero excusas. Saquen y cumplan.
           </Text>
         )}
       </View>
@@ -97,7 +97,7 @@ export function RouletteScreen({
           disabled={running}
         >
           <Text style={styles.spinLabel}>
-            {running ? 'En curso…' : challenge ? 'Otro reto' : 'Girar'}
+            {running ? 'En curso…' : challenge ? 'Otro reto' : 'Sacar reto'}
           </Text>
         </Pressable>
       </View>
@@ -112,9 +112,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   title: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 30,
     textAlign: 'center',
   },
   body: {
@@ -130,27 +130,27 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.bgCard,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius,
+    borderColor: colors.borderStrong,
+    borderRadius: radii.large,
     padding: 26,
     alignItems: 'center',
     gap: 18,
   },
   challenge: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 21,
-    lineHeight: 30,
+    fontSize: 27,
+    lineHeight: 34,
     textAlign: 'center',
-    fontWeight: '600',
   },
   timer: {
+    fontFamily: fonts.display,
     color: colors.fire,
-    fontSize: 42,
-    fontWeight: '800',
+    fontSize: 46,
     fontVariant: ['tabular-nums'],
   },
   timerDone: {
-    color: colors.dare,
+    color: colors.fire,
     fontSize: 30,
   },
   track: {
@@ -170,16 +170,16 @@ const styles = StyleSheet.create({
   },
   spinButton: {
     backgroundColor: colors.fire,
-    paddingVertical: 15,
+    paddingVertical: 17,
     paddingHorizontal: 48,
-    borderRadius: radius,
+    borderRadius: radii.pill,
   },
   spinButtonDisabled: {
     opacity: 0.45,
   },
   spinLabel: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
+    color: colors.onFire,
+    fontSize: 16,
   },
 })

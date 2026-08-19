@@ -7,9 +7,10 @@ import type { CollectionState, PoseRating } from '@/domain/pose-collection'
 import { BackButton } from '../components/BackButton'
 import { PoseArt } from '../components/PoseArt'
 import { ScratchCard } from '../components/ScratchCard'
+import { SpiceDots } from '../components/SpiceDots'
 import { SpiceRating } from '../components/SpiceRating'
 import { POSE_IMAGE_CREDIT } from '../pose-images'
-import { colors, radius } from '../theme'
+import { colors, fonts, radii } from '../theme'
 
 const SUCCESS_SOUND = require('../../assets/sounds/success.wav')
 
@@ -115,7 +116,7 @@ export function CollectionScreen({
                     {item.name}
                   </Text>
                   <Text style={styles.slotRating}>
-                    {entry.rating !== null ? '🔥'.repeat(entry.rating) : '· · ·'}
+                    {entry.rating !== null ? `${entry.rating}/5` : '· · ·'}
                   </Text>
                 </>
               ) : (
@@ -133,7 +134,7 @@ export function CollectionScreen({
           disabled={!ready || unlocking || owned >= total}
         >
           <Text style={styles.unlockLabel}>
-            {owned >= total ? 'Colección completa 🏆' : 'Nueva pose 🎁'}
+            {owned >= total ? 'Colección completa' : 'Nueva pose'}
           </Text>
         </Pressable>
         {owned < total && (
@@ -204,7 +205,7 @@ function SuccessBanner() {
 
   return (
     <Animated.View style={[styles.successBanner, { opacity, transform: [{ scale }] }]}>
-      <Text style={styles.successText}>🎉 ¡Nueva pose desbloqueada!</Text>
+      <Text style={styles.successText}>¡Nueva pose desbloqueada!</Text>
     </Animated.View>
   )
 }
@@ -216,7 +217,7 @@ function PoseReveal({ pose, catalog }: { pose: Pose; catalog: PoseCatalog }) {
       <Text style={styles.revealName}>{pose.name}</Text>
       <Text style={styles.revealDescription}>{pose.description}</Text>
       <Text style={styles.revealHowTo}>{pose.howTo}</Text>
-      <Text style={styles.revealSpice}>{'🔥'.repeat(pose.spice)}</Text>
+      <SpiceDots spice={pose.spice} />
     </View>
   )
 }
@@ -228,9 +229,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   title: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 26,
-    fontWeight: '700',
+    fontSize: 30,
     textAlign: 'center',
   },
   counter: {
@@ -263,12 +264,12 @@ const styles = StyleSheet.create({
   slotQuestion: {
     color: colors.textDim,
     fontSize: 34,
-    fontWeight: '800',
+    fontFamily: fonts.medium,
   },
   slotName: {
     color: colors.text,
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: fonts.medium,
   },
   slotRating: {
     color: colors.textDim,
@@ -280,17 +281,17 @@ const styles = StyleSheet.create({
   },
   unlockButton: {
     backgroundColor: colors.fire,
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: radius,
+    paddingVertical: 17,
+    paddingHorizontal: 44,
+    borderRadius: radii.pill,
   },
   unlockDisabled: {
     opacity: 0.45,
   },
   unlockLabel: {
-    color: '#fff',
+    fontFamily: fonts.medium,
+    color: colors.onFire,
     fontSize: 16,
-    fontWeight: '700',
   },
   unlockAll: {
     color: colors.textDim,
@@ -312,7 +313,7 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     backgroundColor: colors.bg,
-    borderRadius: radius,
+    borderRadius: radii.medium,
     borderWidth: 1,
     borderColor: colors.border,
     padding: 20,
@@ -329,9 +330,9 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   revealName: {
+    fontFamily: fonts.display,
     color: colors.text,
-    fontSize: 21,
-    fontWeight: '700',
+    fontSize: 26,
     textAlign: 'center',
   },
   revealDescription: {
@@ -350,14 +351,14 @@ const styles = StyleSheet.create({
   },
   successBanner: {
     backgroundColor: colors.fire,
-    borderRadius: 999,
-    paddingVertical: 8,
+    borderRadius: radii.pill,
+    paddingVertical: 9,
     paddingHorizontal: 18,
   },
   successText: {
-    color: '#fff',
-    fontWeight: '800',
-    fontSize: 15,
+    fontFamily: fonts.medium,
+    color: colors.onFire,
+    fontSize: 14,
   },
   ratingBlock: {
     alignItems: 'center',
@@ -369,11 +370,11 @@ const styles = StyleSheet.create({
   closeButton: {
     paddingVertical: 10,
     paddingHorizontal: 24,
-    borderRadius: radius,
+    borderRadius: radii.medium,
     backgroundColor: colors.surface,
   },
   closeLabel: {
     color: colors.text,
-    fontWeight: '700',
+    fontFamily: fonts.medium,
   },
 })
