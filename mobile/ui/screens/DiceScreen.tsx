@@ -39,12 +39,14 @@ export function DiceScreen({
   collection,
   onBack,
   onGoToCollection,
+  onActivity,
 }: {
   random: RandomSource
   catalog: PoseCatalog
   collection: CollectionState
   onBack: () => void
   onGoToCollection: () => void
+  onActivity: () => void
 }) {
   const [mode, setMode] = useState<DiceMode>('classic')
   const [roll, setRoll] = useState<ActionZoneRoll | null>(null)
@@ -70,6 +72,7 @@ export function DiceScreen({
       return
     }
     setRolling(true)
+    onActivity()
     shake.setValue(0)
     Animated.loop(
       Animated.sequence([

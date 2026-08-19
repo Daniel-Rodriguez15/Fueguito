@@ -23,6 +23,7 @@ export function CollectionScreen({
   ready,
   onCollectionChange,
   onBack,
+  onActivity,
 }: {
   catalog: PoseCatalog
   service: PoseCollectionService
@@ -30,6 +31,7 @@ export function CollectionScreen({
   ready: boolean
   onCollectionChange: (state: CollectionState) => void
   onBack: () => void
+  onActivity: () => void
 }) {
   const [fresh, setFresh] = useState<Pose | null>(null)
   const [scratchDone, setScratchDone] = useState(false)
@@ -63,6 +65,7 @@ export function CollectionScreen({
         onCollectionChange(result.state)
         setScratchDone(false)
         setFresh(result.pose)
+        onActivity()
       }
     } finally {
       setUnlocking(false)

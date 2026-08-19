@@ -11,7 +11,15 @@ const LEVELS: ReadonlyArray<{ id: IntensityLevel; icon: string; label: string }>
   { id: 'fire', icon: '🔥', label: 'Fuego' },
 ]
 
-export function TruthOrDareScreen({ game, onBack }: { game: TruthOrDareGame; onBack: () => void }) {
+export function TruthOrDareScreen({
+  game,
+  onBack,
+  onActivity,
+}: {
+  game: TruthOrDareGame
+  onBack: () => void
+  onActivity: () => void
+}) {
   const [level, setLevel] = useState<IntensityLevel>('soft')
   const [prompt, setPrompt] = useState<Prompt | null>(null)
 
@@ -54,13 +62,19 @@ export function TruthOrDareScreen({ game, onBack }: { game: TruthOrDareGame; onB
       <View style={styles.actionRow}>
         <Pressable
           style={[styles.button, { backgroundColor: colors.truth }]}
-          onPress={() => setPrompt(game.draw('truth', level))}
+          onPress={() => {
+            setPrompt(game.draw('truth', level))
+            onActivity()
+          }}
         >
           <Text style={styles.buttonLabel}>Verdad</Text>
         </Pressable>
         <Pressable
           style={[styles.button, { backgroundColor: colors.dare }]}
-          onPress={() => setPrompt(game.draw('dare', level))}
+          onPress={() => {
+            setPrompt(game.draw('dare', level))
+            onActivity()
+          }}
         >
           <Text style={styles.buttonLabel}>Reto</Text>
         </Pressable>
