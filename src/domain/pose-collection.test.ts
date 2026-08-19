@@ -47,6 +47,19 @@ describe('unlockRandomPose', () => {
   })
 })
 
+describe('unlockAllPoses', () => {
+  it('unlocks everything while preserving existing ratings', async () => {
+    const { unlockAllPoses } = await import('./pose-collection')
+    const partial = { entries: { a: { rating: 3 as const } } }
+
+    const next = unlockAllPoses(partial, POSE_IDS)
+
+    expect(Object.keys(next.entries).sort()).toEqual(['a', 'b', 'c'])
+    expect(next.entries.a.rating).toBe(3)
+    expect(next.entries.b.rating).toBeNull()
+  })
+})
+
 describe('ratePose', () => {
   it('stores a rating for an unlocked pose', () => {
     const { state, poseId } = unlockRandomPose(EMPTY_COLLECTION, POSE_IDS, Math.random)!
