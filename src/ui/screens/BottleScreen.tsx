@@ -11,7 +11,7 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
   const [name, setName] = useState('')
   const [rotation, setRotation] = useState(0)
   const [spinning, setSpinning] = useState(false)
-  const [targetIndex, setTargetIndex] = useState<number | null>(null)
+  const [pair, setPair] = useState<{ tip: number; base: number } | null>(null)
   const timerRef = useRef<number | null>(null)
 
   useEffect(
@@ -30,7 +30,7 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
     }
     setPlayers([...players, trimmed])
     setName('')
-    setTargetIndex(null)
+    setPair(null)
   }
 
   const removePlayer = (index: number) => {
@@ -38,23 +38,23 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
       return
     }
     setPlayers(players.filter((_, i) => i !== index))
-    setTargetIndex(null)
+    setPair(null)
   }
 
   const spin = () => {
     if (spinning || players.length < MIN_BOTTLE_PLAYERS) {
       return
     }
-    const { targetIndex: chosen } = spinBottle(players.length, random)
+    const result = spinBottle(players.length, random)
     const anglePerPlayer = 360 / players.length
     const currentAngle = ((rotation % 360) + 360) % 360
-    const delta = (chosen * anglePerPlayer - currentAngle + 360) % 360
+    const delta = (result.tipIndex * anglePerPlayer - currentAngle + 360) % 360
     setRotation(rotation + SPIN_EXTRA_TURNS * 360 + delta)
     setSpinning(true)
-    setTargetIndex(null)
+    setPair(null)
     timerRef.current = window.setTimeout(() => {
       setSpinning(false)
-      setTargetIndex(chosen)
+      setPair({ tip: result.tipIndex, base: result.baseIndex })
     }, SPIN_DURATION_MS)
   }
 
@@ -90,7 +90,7 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
           <button
             key={player}
             type="button"
-            className={`player-chip ${targetIndex === index ? 'chosen' : ''}`}
+            className={`player-chip ${pair?.tip === index ? 'chosen' : ''} ${pair?.base === index ? 'chosen-base' : ''}`}
             style={{
               transform: `translate(-50%, -50%) rotate(${index * anglePerPlayer}deg) translateY(-8.5rem) rotate(${-index * anglePerPlayer}deg)`,
             }}
@@ -117,7 +117,7 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
         <p className="screen-hint">Agrega al menos {MIN_BOTTLE_PLAYERS} jugadores</p>
       ) : (
         <p className="bottle-result" aria-live="polite">
-          {targetIndex !== null ? `La botella eligió a ${players[targetIndex]} 🔥` : ' '}
+          {pair !== null ? `¡${players[pair.tip]} y ${players[pair.base]} se besan! 💋` : ' '}
         </p>
       )}
 

@@ -11,11 +11,19 @@ const SPIN_DURATION_MS = 3000
 const CIRCLE_SIZE = 300
 const CHIP_RADIUS = 128
 
-export function BottleScreen({ random, onBack }: { random: RandomSource; onBack: () => void }) {
+export function BottleScreen({
+  random,
+  onBack,
+  onActivity,
+}: {
+  random: RandomSource
+  onBack: () => void
+  onActivity: () => void
+}) {
   const [players, setPlayers] = useState<string[]>([])
   const [name, setName] = useState('')
   const [spinning, setSpinning] = useState(false)
-  const [targetIndex, setTargetIndex] = useState<number | null>(null)
+  const [pair, setPair] = useState<{ tip: number; base: number } | null>(null)
   const rotationRef = useRef(0)
   const rotation = useRef(new Animated.Value(0)).current
 
@@ -28,7 +36,7 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
     }
     setPlayers([...players, trimmed])
     setName('')
-    setTargetIndex(null)
+    setPair(null)
   }
 
   const removePlayer = (index: number) => {
@@ -36,21 +44,22 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
       return
     }
     setPlayers(players.filter((_, i) => i !== index))
-    setTargetIndex(null)
+    setPair(null)
   }
 
   const spin = () => {
     if (spinning || players.length < MIN_BOTTLE_PLAYERS) {
       return
     }
-    const { targetIndex: chosen } = spinBottle(players.length, random)
+    const result = spinBottle(players.length, random)
     const anglePerPlayer = 360 / players.length
     const currentAngle = ((rotationRef.current % 360) + 360) % 360
-    const delta = (chosen * anglePerPlayer - currentAngle + 360) % 360
+    const delta = (result.tipIndex * anglePerPlayer - currentAngle + 360) % 360
     const nextRotation = rotationRef.current + SPIN_EXTRA_TURNS * 360 + delta
 
     setSpinning(true)
-    setTargetIndex(null)
+    setPair(null)
+    onActivity()
     Animated.timing(rotation, {
       toValue: nextRotation,
       duration: SPIN_DURATION_MS,
@@ -60,7 +69,7 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
       if (finished) {
         rotationRef.current = nextRotation
         setSpinning(false)
-        setTargetIndex(chosen)
+        setPair({ tip: result.tipIndex, base: result.baseIndex })
       }
     })
   }
@@ -101,14 +110,15 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
               style={[
                 styles.chip,
                 { transform: [{ translateX: x }, { translateY: y }] },
-                targetIndex === index && styles.chipChosen,
+                pair?.tip === index && styles.chipChosen,
+                pair?.base === index && styles.chipChosenBase,
               ]}
               onPress={() => removePlayer(index)}
               accessibilityRole="button"
               accessibilityLabel={`${player}, tocar para quitar`}
             >
               <Text
-                style={[styles.chipLabel, targetIndex === index && styles.chipLabelChosen]}
+                style={[styles.chipLabel, (pair?.tip === index || pair?.base === index) && styles.chipLabelChosen]}
                 numberOfLines={1}
               >
                 {player}
@@ -125,7 +135,7 @@ export function BottleScreen({ random, onBack }: { random: RandomSource; onBack:
         <Text style={styles.hint}>Agrega al menos {MIN_BOTTLE_PLAYERS} jugadores</Text>
       ) : (
         <Text style={styles.result} accessibilityLiveRegion="polite">
-          {targetIndex !== null ? `La botella eligió a ${players[targetIndex]} 🔥` : ' '}
+          {pair !== null ? `¡${players[pair.tip]} y ${players[pair.base]} se besan! 💋` : ' '}
         </Text>
       )}
 
@@ -199,6 +209,9 @@ const styles = StyleSheet.create({
   },
   chipChosen: {
     backgroundColor: colors.fire,
+  },
+  chipChosenBase: {
+    backgroundColor: colors.dare,
   },
   chipLabel: {
     color: colors.text,
