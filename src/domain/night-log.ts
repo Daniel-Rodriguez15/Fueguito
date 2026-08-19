@@ -21,18 +21,38 @@ export function previousDay(date: string): string {
   return time.toISOString().slice(0, 10)
 }
 
+export interface StreakInfo {
+  /** Consecutive active days, forgiving at most one missed day. */
+  readonly length: number
+  /** True when the streak dies unless they play today (grace day in use). */
+  readonly atRisk: boolean
+}
+
 /**
- * Consecutive days with activity ending today. A streak survives if the last
- * activity was yesterday (today just has not happened yet).
+ * Streak with one grace day: a single missed day does not kill the streak,
+ * but a second one does. Today never consumes the grace (it is not over yet).
  */
-export function currentStreak(state: NightLogState, today: string): number {
-  let cursor = today in state.entries ? today : previousDay(today)
-  let streak = 0
-  while (cursor in state.entries) {
-    streak += 1
+export function streakInfo(state: NightLogState, today: string): StreakInfo {
+  const active = (date: string) => date in state.entries
+  let cursor = today
+  if (!active(cursor)) {
     cursor = previousDay(cursor)
   }
-  return streak
+  let length = 0
+  let graceUsed = false
+  while (true) {
+    if (active(cursor)) {
+      length += 1
+      cursor = previousDay(cursor)
+    } else if (!graceUsed) {
+      graceUsed = true
+      cursor = previousDay(cursor)
+    } else {
+      break
+    }
+  }
+  const atRisk = length > 0 && !active(today) && !active(previousDay(today))
+  return { length, atRisk }
 }
 
 export function activeDaysInMonth(state: NightLogState, yearMonth: string): readonly string[] {
