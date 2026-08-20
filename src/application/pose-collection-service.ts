@@ -2,6 +2,8 @@ import type { CollectionRepository } from '@/domain/collection-repository'
 import type { Pose, PoseCatalog } from '@/domain/pose'
 import {
   ratePose,
+  toggleFavorite,
+  toggleToTry,
   unlockAllPoses,
   unlockRandomPose,
   type CollectionState,
@@ -20,6 +22,8 @@ export interface PoseCollectionService {
   unlock(state: CollectionState): Promise<UnlockedPose | null>
   unlockAll(state: CollectionState): Promise<CollectionState>
   rate(state: CollectionState, poseId: string, rating: PoseRating): Promise<CollectionState>
+  toggleFavorite(state: CollectionState, poseId: string): Promise<CollectionState>
+  toggleToTry(state: CollectionState, poseId: string): Promise<CollectionState>
 }
 
 export function createPoseCollectionService(
@@ -70,6 +74,22 @@ export function createPoseCollectionService(
 
     async rate(state, poseId, rating) {
       const next = ratePose(state, poseId, rating)
+      if (next !== state) {
+        await enqueueSave(next)
+      }
+      return next
+    },
+
+    async toggleFavorite(state, poseId) {
+      const next = toggleFavorite(state, poseId)
+      if (next !== state) {
+        await enqueueSave(next)
+      }
+      return next
+    },
+
+    async toggleToTry(state, poseId) {
+      const next = toggleToTry(state, poseId)
       if (next !== state) {
         await enqueueSave(next)
       }

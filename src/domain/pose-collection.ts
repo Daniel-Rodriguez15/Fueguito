@@ -5,6 +5,8 @@ export type PoseRating = 1 | 2 | 3 | 4 | 5
 
 export interface CollectionEntry {
   readonly rating: PoseRating | null
+  readonly favorite?: boolean
+  readonly toTry?: boolean
 }
 
 export interface CollectionState {
@@ -55,6 +57,24 @@ export function unlockAllPoses(state: CollectionState, poseIds: readonly string[
     }
   }
   return { entries }
+}
+
+/** Toggles the favorite flag; unknown poses are a no-op. */
+export function toggleFavorite(state: CollectionState, poseId: string): CollectionState {
+  const entry = state.entries[poseId]
+  if (!entry) {
+    return state
+  }
+  return { entries: { ...state.entries, [poseId]: { ...entry, favorite: !entry.favorite } } }
+}
+
+/** Toggles the "to try" flag; unknown poses are a no-op. */
+export function toggleToTry(state: CollectionState, poseId: string): CollectionState {
+  const entry = state.entries[poseId]
+  if (!entry) {
+    return state
+  }
+  return { entries: { ...state.entries, [poseId]: { ...entry, toTry: !entry.toTry } } }
 }
 
 /** Rating an unknown pose is a no-op: you can only rate what you unlocked. */
